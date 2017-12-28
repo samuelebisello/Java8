@@ -324,3 +324,99 @@ keyword `static`:
 
 Un metodo marcato `final` non può essere overriden in una sottoclasse. #vedi interfacce ed
 ereditarietà.
+
+### Nested Classes
+
+Java consente la creazione di classi interne
+
+```java
+class OuterClass {
+  ...
+  class NestedClass {
+    ...
+  }
+}
+```
+
+Le classi nidificate sono divise in due categorie:
+
+* statiche (static nested class)
+* non statiche (inner class)
+
+```java
+class OuterClass {
+  ...
+  static class StaticNestedClass {
+    ...
+  }
+  class InnerClass {
+    ...
+  }
+}
+```
+
+Una classe nidificata è un membro della classe esterna. Le classi nidificate non statiche (classi interne) hanno accesso ad altri membri della classe esterna, anche se dichiarati `private`. Le classi nidificate statiche non hanno accesso ai membri della classe esterna. In quanto membro della
+classe esterna una classe nidificata può essere dichiarata `private`, `public`, `protected`, o
+senza modificatori cioè package private.
+
+#### Why Use Nested Classes?
+
+Validi motivi per usare le classi nidificate sono:
+
+* È un modo per raggruppare logicamente classi che sono usate solamente in un posto: Se una classe
+è utile solo per un altra classe, allora è logico integrarla nell'altra classee tenerle insieme.
+
+* Aumenta l'ncapsulamento: Supponiamo due classi di primo livello A e B. Se B ha bisogno di accedere ai membri di A devono essere dichiarati pubblici. Nascondendo la classe B all'interno di A i membri di A possono essere dichiarati privati e B può accedervi. Inoltre B è nascosta dal mondo esterno.
+
+* Può portare a un codice più leggibile e gestibile: L'inserimento di classi di piccole dimensioni all'interno di una classe di alto livello avvicina il codice a dove viene utilizzato.
+
+#### Static Nested Classes
+
+Come per i metodi e le variabili di classe (statiche), una classe statica nidificata è associata alla sua classe esterna. E come per i metodi statici (o di classe), una classe statica nidificata non può riferirsi direttamente alle variabile di istanza o ai metodi definiti nella classe esterna: può usarli solo attraverso un riferimento ad un oggetto.
+
+> Una classe statica nidificata interagisce con i membri di istanza della sua classe esterna proprio come qualsiasi altra classe di livello superiore. In effetti, una classe statica nidificata è comportamentalmente una classe di livello superiore che è stata nidificata in un'altra classe di livello superiore per la convenienza del packaging.
+
+Si accede ad una classe statica nidificata usando il nome della classe esterna:
+
+```java
+OuterClass.StaticNestedClass
+```
+
+Per esempio per creare un oggetto della classe statica nidificata:
+
+```java
+OuterClass.StaticNestedClass nestedObj = new OuterClass.StaticNestedClass();
+```
+
+#### Inner Class
+
+Come per i metodi e le varibili di istanza, una classe interna è associata ad un'istanza della classe esterna e ha accesso diretto ai metodi e ai campi di quell'oggetto. Inoltre, poichè una classe interna è associata ad un'istanza, non può definire alcun membro statico.
+
+Oggetti istanziati da una classe interna **esistono** all'interno di un'istanza della classe esterna:
+
+```java
+class OuterClass {
+  ...
+  class InnerClass {
+    ...
+  }
+}
+```
+
+Un istanza di una classe interna può esistere solo all'interno di un'istanza di una classe esterna e ha accesso diretto ai metodi e ai campi dell'istanza della classe esterna.
+Dalla classe esterna è possibile accedere a tutti i membri della classe interna ma solo tramite un istanza dell'oggetto della classe interna.
+
+Dall'esterno, per istanziare una classe interna, bisogna prima istanziare la classe esterna, poi creare l'oggetto della classe interna usando l'oggetto della classe esterna:
+
+```java
+OuterClass.InnerClass innerObj = outerObj.new InnerClass();
+```
+
+Esistoni due tipi speciali di classe interne (non statiche):
+
+* classi locali
+* classi anonime
+
+#### Shadowing
+
+Se una dichiarazione di un tipo (come una variabile membro o un nome di un parametro) in un particolare scope (come in una classe interna o nella difinizione di un metodo) ha lo stesso nome di un'altra dichiarazione di variabile in uno scope più esterno, allora la dichiarazione nello scope più interno nasconde quello nello scope più esterno.
