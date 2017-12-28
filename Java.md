@@ -370,24 +370,6 @@ Validi motivi per usare le classi nidificate sono:
 
 * Può portare a un codice più leggibile e gestibile: L'inserimento di classi di piccole dimensioni all'interno di una classe di alto livello avvicina il codice a dove viene utilizzato.
 
-#### Static Nested Classes
-
-Come per i metodi e le variabili di classe (statiche), una classe statica nidificata è associata alla sua classe esterna. E come per i metodi statici (o di classe), una classe statica nidificata non può riferirsi direttamente alle variabile di istanza o ai metodi definiti nella classe esterna: può usarli solo attraverso un riferimento ad un oggetto.
-
-> Una classe statica nidificata interagisce con i membri di istanza della sua classe esterna proprio come qualsiasi altra classe di livello superiore. In effetti, una classe statica nidificata è comportamentalmente una classe di livello superiore che è stata nidificata in un'altra classe di livello superiore per la convenienza del packaging.
-
-Si accede ad una classe statica nidificata usando il nome della classe esterna:
-
-```java
-OuterClass.StaticNestedClass
-```
-
-Per esempio per creare un oggetto della classe statica nidificata:
-
-```java
-OuterClass.StaticNestedClass nestedObj = new OuterClass.StaticNestedClass();
-```
-
 #### Inner Class
 
 Come per i metodi e le varibili di istanza, una classe interna è associata ad un'istanza della classe esterna e ha accesso diretto ai metodi e ai campi di quell'oggetto. Inoltre, poichè una classe interna è associata ad un'istanza, non può definire alcun membro statico.
@@ -404,6 +386,16 @@ class OuterClass {
 ```
 
 Un istanza di una classe interna può esistere solo all'interno di un'istanza di una classe esterna e ha accesso diretto ai metodi e ai campi dell'istanza della classe esterna.
+
+>In pratica, un oggetto di una classe interna possiede un riferiemento all'oggetto della classe esterna che lo ha creato, un _outerThis_.
+
+Per riferirsi esplicitamente ad un membro della classe esterna si può usare il riferimento _outerThis_ con sintassi:
+
+```java
+OuterClass.this.fun() // fun della classe esterna;
+OuterClass.this.var = "outerVar" // campo dati classe esterna
+```
+
 Dalla classe esterna è possibile accedere a tutti i membri della classe interna ma solo tramite un istanza dell'oggetto della classe interna.
 
 Dall'esterno, per istanziare una classe interna, bisogna prima istanziare la classe esterna, poi creare l'oggetto della classe interna usando l'oggetto della classe esterna:
@@ -417,6 +409,32 @@ Esistoni due tipi speciali di classe interne (non statiche):
 * classi locali
 * classi anonime
 
+
+#### Static Nested Classes
+
+Una classe nidificata statica è usata quando non è necessario avere un riferimento ad un oggetto della classe che la contiene. In questo caso rappresenta un tipo logicamente correlato con la classe esterna.
+
+Come per i metodi e le variabili di classe (statiche), una classe statica nidificata è associata alla sua classe esterna. E come per i metodi statici, una classe statica nidificata non può riferirsi direttamente alle variabile di istanza o ai metodi definiti nella classe esterna (non possiede l'_outerThis_): può usarli solo attraverso un riferimento ad un oggetto.
+
+> Una classe statica nidificata interagisce con i membri di istanza della sua classe esterna proprio come qualsiasi altra classe di livello superiore. In effetti, una classe statica nidificata è comportamentalmente una classe di livello superiore che è stata nidificata in un'altra classe di livello superiore per la convenienza del packaging.
+
+
+
+Si accede ad una classe statica nidificata usando il nome della classe esterna:
+
+```java
+OuterClass.StaticNestedClass
+```
+
+Per esempio per creare un oggetto della classe statica nidificata:
+
+```java
+OuterClass.StaticNestedClass nestedObj = new OuterClass.StaticNestedClass();
+```
+
 #### Shadowing
 
-Se una dichiarazione di un tipo (come una variabile membro o un nome di un parametro) in un particolare scope (come in una classe interna o nella difinizione di un metodo) ha lo stesso nome di un'altra dichiarazione di variabile in uno scope più esterno, allora la dichiarazione nello scope più interno nasconde quello nello scope più esterno.
+Se una dichiarazione di un tipo (come una variabile membro o un nome di un parametro) in un particolare scope (come in una classe interna o nella definizione di un metodo) ha lo stesso nome di un'altra dichiarazione di variabile in uno scope più esterno, allora la dichiarazione nello scope più interno nasconde quello nello scope più esterno.
+
+
+#### Local Class
