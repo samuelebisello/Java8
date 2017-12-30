@@ -364,7 +364,7 @@ senza modificatori cioè package private.
 Validi motivi per usare le classi nidificate sono:
 
 * È un modo per raggruppare logicamente classi che sono usate solamente in un posto: Se una classe
-è utile solo per un altra classe, allora è logico integrarla nell'altra classee tenerle insieme.
+è utile solo per un altra classe, allora è logico integrarla nell'altra classe e tenerle insieme.
 
 * Aumenta l'ncapsulamento: Supponiamo due classi di primo livello A e B. Se B ha bisogno di accedere ai membri di A devono essere dichiarati pubblici. Nascondendo la classe B all'interno di A i membri di A possono essere dichiarati privati e B può accedervi. Inoltre B è nascosta dal mondo esterno.
 
@@ -437,4 +437,4 @@ OuterClass.StaticNestedClass nestedObj = new OuterClass.StaticNestedClass();
 Se una dichiarazione di un tipo (come una variabile membro o un nome di un parametro) in un particolare scope (come in una classe interna o nella definizione di un metodo) ha lo stesso nome di un'altra dichiarazione di variabile in uno scope più esterno, allora la dichiarazione nello scope più interno nasconde quello nello scope più esterno.
 
 
-#### Local Class
+#### Local Classes
