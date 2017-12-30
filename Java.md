@@ -264,8 +264,20 @@ Devono usare un riferimento ad un oggetto. Inoltre, i metodi statici non possono
 
 #### Constants
 
-Il modificatore `static` in combinazione a `final`, viene spesso usato per definire costanti.
 Il modificatore `final` indica che il valore di quel campo **non** può cambiare.
+
+Il modificatore `static` in combinazione a `final`, viene usato per definire costanti.
+
+
+```java
+static final double PI = 3.1415;
+```
+
+Costanti definite in questo modo non possono più essere riassegnate in quanto tipo primitivo. Se fosse un oggetto sarebbe immutabile il reference ma non l'oggetto puntato.
+
+> **nota:** se un tipo primitivo o una stringa è difinito come costante ed il suo valore è conosciuto a tempo di compilazione, il compilatore sostituisce ovunque i nomi delle costanti nel codice con il loro valore. Questo meccanismo si chiama **compile-time constant**. Se il valore della costante all'esterno cambia, bisogna ricompilare tutte le classi che usano questa costante per ottenere il nuovo valore.
+
+
 
 #### Initializing Fields
 
@@ -437,4 +449,79 @@ OuterClass.StaticNestedClass nestedObj = new OuterClass.StaticNestedClass();
 Se una dichiarazione di un tipo (come una variabile membro o un nome di un parametro) in un particolare scope (come in una classe interna o nella definizione di un metodo) ha lo stesso nome di un'altra dichiarazione di variabile in uno scope più esterno, allora la dichiarazione nello scope più interno nasconde quello nello scope più esterno.
 
 
-#### Local Classes
+### Local Classes
+
+Le classi locali sono classi definite in un _blocco_, il quale è un gruppo di zero o più statements tra parentesi graffe bilanciate. Tipicamente troviamo classi locali definite nel corpo di un metodo.
+
+#### Declaring Local Classes
+
+È possibile definire una classe locale all'interno di qualsiasi blocco:
+
+```java
+public calss MyClass {
+  public void method() {
+    //statements
+    ...
+    class LocalClass {
+      // members
+    }
+  }
+}
+```
+
+#### Accessing Members of an Enclosing Classe
+
+Una classe locale ha accesso ai membri della classe che la contiene. In più una classe locale ha accesso alle variabili locali del blocco in cui è definita.
+
+Tuttavia una classe locale può accedere solamente a variabili locali dichiarate `final`. Quando una classe locale accede ad un variabile o parametro nel blocco in cui è contenuta la classe, _cattura_ quella variabile o parametro.
+
+> **nota:** la variabile _catturata_ viene detta **captured variable**
+
+Da Java 8 una classe locale può accedere a variabili locali e parametri del blocco in cui è definita che sono `final` o `effective final`. Una variabile o parametro il cui valore non è mai cambiato dopo la sua inizializzazione si dice `effective final`. Inoltre, sempre a partire da Java 8, se si dichiara una classe locale in un metodo, la classe può accedere i parametri del metodo.
+
+#### Shadowing and Local Classes
+
+Dichiarazioni di un tipo (per es. una variabile) in una classe locale nasconde dichiarazioni di tipi con stesso nome dello scope più esterno.
+
+#### Local Classe Are Similar To Inner Classes
+
+* Le classi locali sono simili alle classi interne in quanto non possono definire o dichiarare alcun membro _statico_, a meno che non siano costanti, cioè `static final`.
+
+* Una classe locale definita in un metodo statico puo solo riferirisi a membri statici della classe che la contiene.
+
+* Una classe locale non è statica perchè ha accesso ai membri di istanza del blocco in cui è contenuta.
+
+* Non è possibile dichiarare un interfaccia all'interno di un blocco. Le interfacce sono inerentemente statiche.
+
+* Non è possibile dichiarare inizializzatori statici o interfacce mebro in una classe locale. Una classe locale può avere membri statici purchè siano definiti costanti.
+
+
+### Anonymous Classes
+
+ Le classi anonime consentono di scrivere codice più conciso. Permettono di dichiarare ed instanziare un classe allo stesso tempo. Sono come classi locali ma senza nome. Vengono usate quando si vuole usare una classe locale una sola volta.
+
+#### Declaring Anonymous Classes
+
+Mentre le classi locali sono dichiarazioni di classe, le classi anonime sono espressioni, il che significa che si definisce la classe in un'altra espressione.
+
+#### Syntax Of Anonymous Classes
+
+La sintassi di un'espressione di classe anonima è come un invocazione di un costruttore, tranne per il fatto che esiste una definizione di classe contenuto in un blocco di codice:
+
+```java
+MyClass class = new MyClass() {
+  // members
+};
+```
+
+L'espressione di classe anonima consiste:
+
+* L'operatore `new`
+* Il nome di un interfaccia da implementare o di una classe da estendere.
+* Parentesi che contegono gli argomenti di un costruttore, proprio come una normale espressione di creazione di istanze di classe.
+* Un corpo, che è il corpo di dichiarazione della classe.
+* In quanto espressione, una classe anonime deve essere parte di uno statement. Quindi, come per ogni altro statement si usa il `;` dopo la chiusura delle parenti graffe
+
+#### Accessing Local Variables of the Enclosing Scope, and Declaring and Accessing Members of the Anonymous Class
+
+Come per le classi locali, le classi anonime possono _catturare variabili_. Hanno lo stesso accesso alle variabili locali dello scope in cui sono racchiuse.
