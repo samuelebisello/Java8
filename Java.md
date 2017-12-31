@@ -90,7 +90,7 @@ metodo, il nome del metodo e il tipo dei parametri**
 
 Overloading == metodo con stesso nome.
 Java può distinguere tra due metodi con firme differenti. Ciò significa che metodi in una Classe
-possono avere lo stesso nome se hanno una differente lista di parametri.
+possono avere lo stesso nome se hanno una differente lista di parametri. Il tipo di ritorno non ha influenza.
 
 #### Constructors
 
@@ -699,6 +699,95 @@ Quando si desidera aggiungere funzionalità ad un interfacci (metodi), conviene 
 >> **nota**: I metodi di default consentono di aggiungere nuove funzionalità alle interfacce delle librerie e garantire la compatibilità binaria con il codice scritto per le versioni precedenti di tali interfacce.
 
 ### Inheritance
+
+Ad eccezione della classe Object, che non ha una superclasse, ogni classe ha una sola superclasse diretta (ereditarietà singola). In assenza di qualsiasi altra superclasse esplicita, ogni classe è implicitamente una sottoclasse di Object.
+
+Le classi possono essere derivate da classi derivate da classi derivate da classi e così via e, infine, derivate dalla classe più in alto, Object. Si dice che tale classe discenda da tutte le classi nella catena dell'eredità che si estende da Object.
+
+L'idea di ereditarietà è semplice ma potente: quando vuoi creare una nuova classe e c'è già una classe che include parte del codice che desideri, puoi ricavare la tua nuova classe dalla classe esistente. Nel fare questo, puoi riutilizzare i campi e i metodi della classe esistente senza doverli scrivere.
+
+Una sottoclasse eredita tutti i membri (campi, metodi e classi nidificate) dalla sua superclasse. I costruttori non sono membri, quindi non sono ereditati da sottoclassi, ma il costruttore della superclasse può essere invocato dalla sottoclasse.
+
+
+##### What You Can Do in a Subclass
+
+Una sottoclasse eredita tutti i membri pubblici e protetti della sua classe padre, indipendentemente dal package in cui si trova la sottoclasse. Se la sottoclasse si trova nello stesso package della classe padre eredita anche i suoi membri con accesso package. Puoi utilizzare i membri ereditati così come sono, sostituirli, nasconderli o completarli con nuovi membri:
+* I campi ereditati possono essere utilizzati direttamente, proprio come qualsiasi altro campo. 
+* E' possibile dichiarare un campo nella sottoclasse con lo stesso nome di quello nella superclasse (non consigliato), nascondendolo.
+* Si possono creare nuovi campi dati nella sotoclasse che non sono presenti nella superclasse
+* I metodi ereditati possono essere utilizzati direttamente così come sono
+* si può scrivere un nuovo metodo di istanza nella sottoclasse che ha la stessa firma di quella nella superclasse, quindi fare un override.
+* Si può scrivere un nuov metodo statico nella sottoclasse che ha la stessa firma di quello nella superclasse, quindi fare un override.
+* Si possono dichiarare nuovi metodi nella sottoclasse che non superclasse
+* Si può scrivere un costruttore della sottoclasse che richiama il costruttore della superclasse, implicitamente o usando la keyword `super`.
+
+##### Private Member in a Superclass
+
+Una sottoclasse non eredita i membri `private` della sua superclasse diretta. Tuttavia, se la superclasse ha metodi marcati `public` o `protected` che accedono ai suoi campi privati, questi possono essere usati dalla sottoclasse.
+
+Una classe nidificata ha accesso a tutti i membri privati della classe che la contiene, sia campi dati che metodi. Perciò una classe nidificate marcata `public` o `protected` ereditata da una sottoclasse ha accesso indiretto a tutti i membri privati della superclasse.
+
+##### Casting Objects
+
+Il casting mostra l'uso di un oggetto di un tipo al posto di un altro tipo, tra gli oggertti consentiti dall'ereditarietà e dalle implementazioni.
+
+>> **nota**: è possibile eseguire un test logico sul tipo di un particolare oggetto utilizzando l'operatore `instanceof`. Può salvarti da un errore di runtime a causa di un cast improprio.
+
+#### Multiple Inheritance of State, Implementation, and Type
+
+L'ereditarietà multipla di implementazione è la capacità di ereditare definizioni di metodi da più classi. Possono sorgere conflitti in questo tipo di ereditarietà (di nome, ambiguità). I metodi di default introducono una forma di eredità multipla di implementazione. Una classe può implementare più di un'interfaccia, che può contenere metodi di default con lo stesso nome. Il compilatore fornisce alcune regole per determinare quale metodo di default utilizza una determinata classe.
+
+L'ereditarietà multipla di tipo è la capacità di una classe di implementare più di un'interfaccia. Un oggetto può avere più tipi: il tipo della sua classe e i tipi di tutti le interfacce implementate dalla classe. Ciò significa che se una variabile viene dichiarata di tipo Interfaccia, allora il suo valore può riferire qualunque oggetto che è istanziato da qualsiasi classe che implementa quell'interfaccia.
+
+Una classe può ereditare diverse implementazioni di un metodo definito (default o statico) nelle interfacce che estende. In questo caso, il compilatore o l'utente deve decidere quale utilizzare.
+
+
+#### Overriding and Hiding Methods
+
+##### Instance Methods
+
+Un metodo di istanza in una sottoclasse con:
+
+* stessa firma (nome, numero e tipo di parametri)
+* stesso tipo di ritorno o covariante
+
+sovrascrive il metodo della superclasse (override).
+
+L'abilità di una sottoclasse di fare un override di un metodo permette di ereditare tale metodo da una superclasse il cui comportamento è abbastanza vicino e quindi di modificarne il comportamento secondo necessità. L'override ha stesso nome, numero di parametri e tipo di ritorno del metodo che viene sovrascritto. Un metodo sovrascritto può anche essere ritornare un sottotipo del tipo redtituito dal metodo sottoposto ad override. Questo sottotipo è chiamato tipo di ritorno covariante.
+
+Quando si fa override di un metodo, è possibile usare l'annotazione @Override che indica al compilatore che si intende sovrascrivere un metodo nella superclasse.
+
+
+##### Static Method
+
+Se una sottoclasse definisce un metodo statico con la stessa firma di un metodo statico nella superclasse, il metodo nella sottoclasse nasconde quello nella superclasse.
+
+La distinzione tra nascondere un metodo statico e fare un ovveride di un metodo di istanza ha risvolti importanti:
+
+* La versione del metodo di istanza sottoposto ad override che viene richiamato è quello della sottoclasse. 
+* La versione del metodo statico nascosto che viene richiamato dipende dal fatto che sia invocato dalla supercalsse o dalla sottoclasse.
+
+##### Interface Methods
+
+Metodi di default e metodi astratti nelle interfacce sono ereditati come metodi di istanza. Tuttavia, quando i supertipi di una classe o di un'interfaccia forniscono più metodi predefiniti con la stessa firma, il compilatore Java segue le regole di ereditarietà per risolvere il conflitto di nomi. Queste regole sono guidate dai seguenti due principi:
+
+* I metodi di istanza sono preferiti rispetto ai metodi di default dell'interfaccia
+* I metodi già sovrascritti da altri candidati vengono ignorati. Questa circostanza può sorgere quando i supertipi condividono un antenato comune.
+
+Se una classe implementa due interfaccie identiche, per esempio con un metodo di default identico, si può scegliere quale dei due invocare attraverso la keyword `super`.
+
+Il nome che precede `super` deve fare riferimento ad una superinterfaccia/superclasse diretta che definisce o eredita il metodo. E' possibile usare `super` per invocare un metodo di default sia in classi che in interfacce.
+
+>> **nota**: Metodi statici in interfacce non sono mai ereditati
+
+##### Modifiers
+
+Il modificatore d'accesso per un metodo overraidato può "permettere di pù",  ma non meno. Dà un errore di compilazione.
+
+>> **nota**: n una sottoclasse, è possibile overloaddare i metodi ereditati dalla superclasse. Tali metodi non nascondono né sovrascrivono i metodi di istanza della superclasse: sono nuovi metodi, unici per la sottoclasse.
+
+#### Polymorphism
+
 
 
 
