@@ -524,4 +524,216 @@ L'espressione di classe anonima consiste:
 
 #### Accessing Local Variables of the Enclosing Scope, and Declaring and Accessing Members of the Anonymous Class
 
-Come per le classi locali, le classi anonime possono _catturare variabili_. Hanno lo stesso accesso alle variabili locali dello scope in cui sono racchiuse.
+Come per le classi locali, le classi anonime possono _catturare variabili_. Hanno lo stesso accesso alle variabili locali dello scope in cui sono racchiuse:
+
+* una classe anonima ha accesso ai membri della classe che la contiene
+* una classe anonima non può accedere a variabili locali nello scope in cui è contenuta che non sono dichiarate `final` o effective final
+* Come per una classe interna, una dichiarazione di un tipo (come una variabile membro o un nome di un parametro) in un particolare scope (come in una classe interna o nella definizione di un metodo) ha lo stesso nome di un'altra dichiarazione di variabile in uno scope più esterno, allora la dichiarazione nello scope più interno nasconde quello nello scope più esterno
+
+Le classi anonime hanno anche le stesse restrizioni delle classi locali rispetto ai loro membri:
+
+* non si possono dichiarare inizializzatori statici o interfacce membro in una classe anonima
+* una classe anonima può avere membri statici purchè siano variabile costanti.
+
+In una classe anonima puoi dichiarare i seguenti:
+
+* Campi
+* Metodi aggiuntivi (anche se non possono implementare alcun metodo di un supertipo)
+* Inizializzatori di istanziare
+* Classi locali
+
+Tuttavia, non è possibile dichiarare costruttori in una classe anonima. Le classi anonime sono ideali per implementare interfacce.
+
+### Lambda Expressions
+
+Un problema con le calssi anonime è che se l'implementazione è semplice, l asintassi può sembrare poco pratica e poco chiara.
+Le espressioni lambda consentono di esprimere le istanze delle _calssi a metodo singolo_ in modo più compatto.
+
+> **note:** Un interfaccia funzionale è una qualsiasi interfaccia che contiene solo un metodo astratto.
+Siccome contiene solo un metodo si può omettere il nome del metodo quando lo si implementa. Per fare ciò, invece di usare una classe anonima, usiamo un _lambda expression_. Sintassi:
+
+```java
+() -> {
+  // body's method
+}
+};
+```
+
+### Method References
+
+Si usano espressioni lambda per creare metodi anonimi. A volte, un'espressione lambda non fa altro che chiamare un metodo esistente. In questi caso è più chiaro fare riferimento al metodo esistente per nome. I method reference (reiferimenti a metodo) consentono di farlo. Sono espressioni lambda compatte e facili da leggere per metodi che hanno già un nome.
+
+Il method reference `MyClass::fun` è semanticamente lo stesso dell'espressione lambda `(a.b) -> MyClass.fun(a,b)`. Ognuni ha le seguenti caratteristiche:
+
+* lista dei parametri formali copiata da da quelli del metodo fun, in questo caso a e b
+* il corpo chiama il metodo fun
+
+#### Kinds of Method References
+
+Tipologia     | Esempi
+--------------|---------
+Riferimento a metodo statico      | ContainingClass::staticMethodName
+Riferimento ad unmetodo di istanza di un particolare oggetto     | ContainingObject::instanceMethodName
+Riferimento ad un metodo di istanza di un particolare metodo di un tipo particolare        | ContainingType::methodName
+Riferimento ad un costruttore       | ClassName::new
+
+
+### When to Use Nested Classes, Local Classes, Anonymous Classes, and Lambda Expressions
+
+* **Classi Locali**: usate se c'è bisogno di creare più di un'istanza di una classe, accedere al suoi construttore.
+
+* **Classi anonime**: usate se c'è bisogno di dichiarare campi o metodi aggiuntivi
+
+* **Espressioni lambda**:
+  * usate se si vuole incapsulare una singola unità di comportamento che si vuole passare ad un altro codice
+  * usate se si ha bisogno di una semplice istanza di un'interfaccia funzionale e nessuno dei criteri punti si applica
+
+* **Class nidificate**: usate qualore i requisiti sono simili a quelli di una classe locale e si vuole rendere il tipo più disponibile e non si ha bisogno di accedere alle variabili locali o ai parametri di tipo.
+
+  * Utilizzare un classe nidificate non statica (classe interna) se è necessario accedere ai campi dati e ai metodi non pubblici della classe esterna
+  * Utilizzare una classe nidificata statica se non si richiede questo accesso
+
+
+### Enum types
+
+Enum è un tipo di dato che consente ad una variabile di essere un insieme di costanti predefinite. La variabile deve essere uguale a uno dei valori che sono stati predefinit per essa. Poichè sono costanti, i nomi dei campi di un tipo enum sono in lettere maiuscole (segue sintassi delle costanti).
+
+```java
+public enum Day {
+  LUNEDÌ, MARTEDÌ, MERCOLEDÌ, GIOVEDÌ, VENERDÌ, SABATO, DOMENICA
+}
+```
+
+Si dovrebbe usare un `enum` ogni volta che c'è l'esigenza di rappresentare un set fisso di costanti e l'insieme di dati di cui si conoscono tutti i valori possibili a tempo di compilazione.
+
+La dichiarazione enum definisce una classe (chiamata tipo enum). Il corpo della classe può includere metodi e altri campi. Il compilatore aggiunge automaticamente alcuni metodi speciali quando crea un `enum`. Per esempio, un metodo di valori statici che resituisce un array contenente tutti i valori dell'enumerazione in ordine di dichiarazione. Si usa per es. per ciclare:
+
+```java
+for (Day d : Day.values()) {
+  System.out.printl(p);
+}
+```
+
+> **nota**: Tutti gli `enum` implicitamente estendo `java.lang.enum`. Siccome una classe può estendere solo un 'altra classe, java non supporta l'ereditarietà multipla di stato; di conseguenza un `enum` non può estendere nient'altro.
+
+Nel tipo enum, se definisco metodi e campi dati, le costanti devono essere dichiarate prima di qualsiasi altro campo o metodo e richiedono un `;` alla fine della lista. Il costruttore deve avere modificatore `private` o di package. Il costruttore crea automaticamente le costanti definiti all'inizio del corpo della classe. NOn è possibile invocare il costruttore esplicitamente:
+
+```java
+public enum Day
+  LUNEDÌ (info a),
+  MARTEDÌ (info b); // remember ;
+
+  Day(info i) {
+    // code
+  }
+```
+
+## Annotations
+
+  Le annotazioni forniscono dati su un programma. Hanno numerosi usi:
+
+  * Informazioni per il compilatore: possono essere utilizzate dal compilatore per rilevare errori o sopprimere avvertimenti
+  * Elaborazioni a compile time e a deployment time: gli strumenti software possono elaborare informazioni di annotazione per generare codice, file XML ecc.
+  * Elaborazione runtime: alcune annotazioni sono disponibili per essere esaminate in fase di runtime
+
+## Interface and inheritance
+
+### Interface
+
+In Java un'interfaccia è un tipo di riferimento, simile ad una classe, che può contenere solo:
+
+* Costanti
+* Firme del metodo
+* Metodi di default
+* Metodi statici
+* Tipi nidificati
+
+I corpi dei metodi esistono sono per i metodi di default per i metodi statici
+Le interfacce non possono essere istanziate, possono solo essere implementate da classi oppure estese da altre interfacce.
+
+```java
+public Interface MyInterface extends Interface1, Interface2, ... {
+
+  //constant declaration
+  public static final CONSTANT = value;
+
+  // method signature
+  public void method();
+
+  ...
+
+}
+```
+
+Per usare un interfaccia bisogna scrivere una classe che implementi tale interfaccia. Quando istanziamo una classe che implementa un interfaccia bisogna fornire un corpo per ciascuno metodo dichiarato.
+Il livello di accesso come per le classi è `public` o di package.
+Un interfaccia può estendere altre interfacce, proprio come una sottoclasse estende un classe parent. Tuttavia, mentre una classe può estendere solo un'altra classe, un'interfaccia può estendere qualsiasi numero di interfacce.
+
+Il corpo dell'interfaccia può contenere:
+* metodi astratti
+* metodi di Default
+* metodi statici
+
+Tutti i metodi astratti, di default e statici sono implicitamente `public` e si può omettere.
+
+Inoltre può contenere dichiarazioni di costanti. Tutti i valori costanti in una interfaccia sono implicitamente `public`, `static` e `final`. si possono omettere.
+
+#### Implementing an Interface
+
+```java
+public class MyClass extends AnotherClass implements Interface1, Interface2, ... {
+  ...
+}
+```
+
+Per convenzione, quando implemento un interfaccia e devo anche derivare da un'altra classe, prima uso `extends` e poi `implements`.
+
+#### Using an Interface as a Type
+
+Quando si definisce una nuova interfaccia si definisce un nuovo tipo. È possibile usare i nome delle interfacce ovunque sia possibile usare qualsiasi altro nome di tipo di dato. Se si definisce una variabile riferimento il cui tipo è un interfaccia, qualsiasi oggetto che gli venga assegnato deve essere un'istanza di una classe che implementa l'interfaccia.
+
+#### Evolving Interfaces
+
+Quando si desidera aggiungere funzionalità ad un interfacci (metodi), conviene creare nuove interfacce che la estendono con le nuopve funzionalità o in alternativa aggiungere metodi di default o nuovi metodi statici.
+
+>> **nota**: I metodi di default consentono di aggiungere nuove funzionalità alle interfacce delle librerie e garantire la compatibilità binaria con il codice scritto per le versioni precedenti di tali interfacce.
+
+### Inheritance
+
+
+
+## Number and Strings
+
+### Numbers
+
+### Character
+
+### Strings
+
+### Autoboxing and Unboxing
+
+## Generics
+
+### Generics Types
+
+### Generics Methods
+
+### Bounded Type Parameters
+
+### Generics, Inheritance and Subtypes
+
+### Type inference
+
+### Wildcards
+
+### Type Erasure
+
+### Restriction on Generics
+
+## Exceptions
+
+## Basic I/O
+
+## Concurrency
+
+## Networking
