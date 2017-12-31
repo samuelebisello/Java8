@@ -696,7 +696,7 @@ Quando si definisce una nuova interfaccia si definisce un nuovo tipo. È possibi
 
 Quando si desidera aggiungere funzionalità ad un interfacci (metodi), conviene creare nuove interfacce che la estendono con le nuopve funzionalità o in alternativa aggiungere metodi di default o nuovi metodi statici.
 
->> **nota**: I metodi di default consentono di aggiungere nuove funzionalità alle interfacce delle librerie e garantire la compatibilità binaria con il codice scritto per le versioni precedenti di tali interfacce.
+> **nota**: I metodi di default consentono di aggiungere nuove funzionalità alle interfacce delle librerie e garantire la compatibilità binaria con il codice scritto per le versioni precedenti di tali interfacce.
 
 ### Inheritance
 
@@ -731,7 +731,7 @@ Una classe nidificata ha accesso a tutti i membri privati della classe che la co
 
 Il casting mostra l'uso di un oggetto di un tipo al posto di un altro tipo, tra gli oggertti consentiti dall'ereditarietà e dalle implementazioni.
 
->> **nota**: è possibile eseguire un test logico sul tipo di un particolare oggetto utilizzando l'operatore `instanceof`. Può salvarti da un errore di runtime a causa di un cast improprio.
+> **nota**: è possibile eseguire un test logico sul tipo di un particolare oggetto utilizzando l'operatore `instanceof`. Può salvarti da un errore di runtime a causa di un cast improprio.
 
 #### Multiple Inheritance of State, Implementation, and Type
 
@@ -778,15 +778,72 @@ Se una classe implementa due interfaccie identiche, per esempio con un metodo di
 
 Il nome che precede `super` deve fare riferimento ad una superinterfaccia/superclasse diretta che definisce o eredita il metodo. E' possibile usare `super` per invocare un metodo di default sia in classi che in interfacce.
 
->> **nota**: Metodi statici in interfacce non sono mai ereditati
+> **nota**: Metodi statici in interfacce non sono mai ereditati
 
 ##### Modifiers
 
 Il modificatore d'accesso per un metodo overraidato può "permettere di pù",  ma non meno. Dà un errore di compilazione.
 
->> **nota**: n una sottoclasse, è possibile overloaddare i metodi ereditati dalla superclasse. Tali metodi non nascondono né sovrascrivono i metodi di istanza della superclasse: sono nuovi metodi, unici per la sottoclasse.
+> **nota**: n una sottoclasse, è possibile overloaddare i metodi ereditati dalla superclasse. Tali metodi non nascondono né sovrascrivono i metodi di istanza della superclasse: sono nuovi metodi, unici per la sottoclasse.
 
-#### Polymorphism
+#### Hiding Fileds
+
+All'interno di una classe, un campo che ha lo stesso nome di un campo nella superclasse nasconde il campo della superclasse, anche se i loro tipi sono diversi. All'interno della sottoclasse, il campo nella superclasse non può essere referenziato con il suo semplice nome ma può essere acceduto tramite la keytword `super`.
+In generale, non è consigliabile nascondere i campi poiché rende il codice difficile da leggere.
+
+#### Using the Keyword `super`
+
+##### Accessing Superclass Members
+
+Se un metodo sovrascrive (overrides) uno dei metodi della sua superclasse, si può invocare il metodo sovrascritto tramite l'uso dell keyword `super`. Si può usare anche per fare riferimeto ad un campo nascosto (meglio non nascondere mai i campi).
+
+##### Subclass Constructors
+
+La sintassi per chiamare un costruttore di una superclasse è:
+```java
+super();
+
+// or
+
+super(parameter list)
+```
+
+Con `super()` viene chiamato il costruttore senza argomenti dell superclasse. Con `super(parameter list)` viene chiamato il costruttore della superclasse cun una lista di parametri corrispondente. 
+
+> **nota**: se un costruttore nella sottoclasse non richiama esplicitamente un costruttore nella superclasse, il compilatore Java inserisce automaticamente una chiamata al costruttorre senza argomenti della superclasse. Se la superclasse non ha un costruttore senza argomenti(per es. perchè ne è stato definito uno esplicitamente con uno o più parametri), allora si otterà un errore in fase di compilazione.
+
+Se un costruttore di una sottoclasse richiama un costruttore della sua superclasse, in modo esplicito o implicito, si potrebbe pensare che venga chiamata un'intera catena di costruttori , fino al costruttore di Object. In effetti, è proprio così. Si chiama _constructor chaining_.
+
+#### Objects as a Superclass
+
+La classe Object, situata nel package `java.lang`, si trova nella parte più alta della gerarchia delle classi. Ogni classe discende direttamente o indirettamente da Objcet ed eredita i metodi di istanza da Object. Non è necessario utilizzare nessuno di questi metodi, ma, se si sceglie di farlo, si potrebbe avere la necessità sostituirli con codice specifico per la classe. Alcuni dei metodi ereditati da Object sono:
+
+* `protected Object clone() throws CloneNotSupportedException`: crea e ritorna una copia di questo oggetto
+* `public boolean equals(Object obj)`: indica se altrioggetti sono uguali a questo
+* `protected void finalize() throws Throwable`: Chiamato dal garbage collector su di un oggetto quando il garbage collector determina che non ci sono più riferiementi a quell'oggetto.
+* `public final Class getClass()`: ritoena la classe a runtime de un oggetto
+* `public int hashCode()`: ritorna l'hashcode di un oggetto
+* `public String toString()`: ritorna una rappresentazione in forma di stringa di un oggetto
+
+##### The `clone()` Method
+
+Se una classe o una delle sue superclassi, implementa l'interfaccia `Cloneable`, si può usare il metodo `clone()` per creare una copia da un oggetto esistente.
+
+```java
+aCloneableObject.clone();
+```
+L'implementazione di questo metodo controlla se l'oggetto su cui è stato invocato `clone()` implementa l'interfaccia `Cloneable`. Se l'oggetto non lo fa, il metodo lancia un'eccezione `CloneNotSupportedException`. Se si sta per scrivere un  metodo `clone()` sovrascrivendolo dalla classe Object, può essere dichiarato come:
+
+```java
+protected Object clone() throws CloneNotSupportedException
+    /// or
+public Object clone() throws CloneNotSupportedException
+```
+
+Se l'oggetto su cui è stato invocato `clone()` implementa l'interfaccia Cloneable, l'implementazione dell'oggetto del metodo `clone()` crea un oggetto della stessa classe dell'oggetto originale e inizializza le variabili membro del nuovo oggetto con gli stessi valori dell'oggetto originale.
+
+Per alcune classi, il comportamento predefinito del metodo `clone()` ereditato da Object funziona perfettamente. Tuttavia se un oggetto contiene un riferimento a un oggetto esterno, potrebbe essere necessario eseguire l'override del metodo `clone()` per ottenere un comportamento corretto.
+
 
 
 
