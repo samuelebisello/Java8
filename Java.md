@@ -845,6 +845,78 @@ Se l'oggetto su cui è stato invocato `clone()` implementa l'interfaccia Cloneab
 Per alcune classi, il comportamento predefinito del metodo `clone()` ereditato da Object funziona perfettamente. Tuttavia se un oggetto contiene un riferimento a un oggetto esterno, potrebbe essere necessario eseguire l'override del metodo `clone()` per ottenere un comportamento corretto.
 
 
+##### The `equals()` Method
+
+Il metodo`equals()` confronta 2 oggetti e ne verifica l'uguaglianza. Restituisce true se sono uguali. Il metodo `equals()` fornito dalla classe Object utilizza l'operatore id identità `==` per determinare se due oggetti sono uguali. Per i tipi primitivi, questo fornisce il risultato corretto. Per gli oggetti non è così, infatti verifica se i riferimenti sono uguali, ovvero se gli oggetti confrontati sono esattamente lo stesso oggetto. Per verificare se due oggetti sono uguali nel senso di equivalenza (ossia contengono la stessa informazione), è necessario fare un override del metodo `equals()`.
+
+> **nota**: se si fa un override del metodo `equals()` si deve anche fare l'ovveride del metodo `hasCode()`.
+
+##### The `getClass()` method
+
+Non è possibile fare override di questo metodo. Il metodo `getClass()` restituisce un oggett di tipo `Class`, cha ha metodi che è possibile utilizzare per ottenere informazioni sulla classe, come il suo nome, la sua superclasse e le interfacce implementate. 
+
+##### The `hashCode` method
+
+Il valore restituito da questo metodo è l'hash dell'oggetto, che è l'indirizzo di memoria dell'oggetto in esadecimale.
+Per definizione, se due oggetti sono uguali, anche il loro codice hash deve essere uguale. Se si esegue l'override del metodo `equals()` si modifica il modo in cui i due oggetti sono equivalenti e l'implementazione di `hashCode()` dell'oggetto non è più valida. Pertanto se si esegue l'override del metodo `equals()`, è necessario anche sovrascrivere il metodo `hashCode()`.
+
+
+##### The `toString()` Method 
+
+Dovresti sempre considerare di sovrascrivere il metodo toString () nelle tue classi.
+
+Il metodo `toString()` dell'oggetto restituisce una rappresentazione in formato `String` dell'oggetto. La rappresentazione dipende interamente dall'oggetto, motivo per cui è necessario eseguire l'override di `toString()` nelle classi.
+
+
+#### Writing Final Classes and Methods
+
+Si possono dichiarare alcune o anche tutti i metodi di una classe `final`. Si usa la keyword `final` nella dichiarazione di un metodo che non potrà essere overraidato da una sua sottoclasse. S potrebbe bensare di rendere un metodo `final` se è implementato in modo tale che un override renda incoerente la classe. 
+
+
+#### Abstract Method and Classes
+
+Una classe astratta è una classe che è dichiarata `abstract` (può includere o meno metodi astratti). Una classe astratta non 
+può essere istanziata, ma può essere estesa da una sottoclasse.
+
+Un metodo astratto è un metodo dichiarato senza un'implementazione come questo:
+
+```java
+abstract void abstractMethod(double x, double y);
+```
+
+Se una classe contiene almeno un metodo astratto **deve** essere dichiarata astratta.
+Quando una classe astratta viene estesa da una sua sottclasse, la sottoclasse solitamente fornisce un'implementazione per tutti i metodi astratti. Tuttavia, se non lo fa, allora anche la sottoclasse deve essere dichiarata astratta.
+
+> **nota**: I metodi nelle interfacce che non sono statici o di default sono implicitamente astratti, quindi non è necessario usare la keyword `abstract`.
+
+##### Abstract Classes Compared to Interfaces 
+
+Le classi astratte sono simili alle interfacce. Non è possibile istanziarle e possono contenere un mix di metodi con o senza un'implementazione. Tuttavia, con le classi astratte, è possibile dichiarare:
+* campi non statici e `final`
+* definire metodi concreti marcati `public`, `protected` o `private`.
+
+Nelle interfacce, tutti i campi sono automaticamente `public`, `static` e `final` e tutti i metodi che dichiari o definisci (come metodi di default o statici) sono `public`. Inoltre, è possibile estendere solo una classe, indipendentemente dal fatto che sia astratta, mentre è possibile implementare un qualsiasi numero di interfacce.
+
+E' consigliato usare una classe astratta quando una di queste affermazioni si applica alla situazione:
+
+*  Vuoi condividere il codice tra diverse classi strettamente correlate
+*  Ti aspetti che le classi che estendono la tua classe astratta abbiano molti metodi o campi comuni o richiedano modificatori di accesso diversi da `public`
+*  Si desidera dichiarare campi non statici o non `final`. Ciò permette di dichiarare metodi che possono accedere e modificare lo stato corrente dell'oggetto a cui appartengono.
+
+una classe astratta quando una di queste affermazioni si applica alla situazione:
+
+* Ti aspetti che classi non correlate implementino la tua interfaccia. Per esempio le interfacce Comparable e Cloneable sono implementate da molte classi non correlate
+* Si desidera specificare il comportamento di un particolare tipo di dati, ma non ci si preoccupa di chi implementa il suo comportamento.
+* Si vuole sfruttare l'ereditarità multipla di tipo
+
+
+##### When an Abstract Class implements an Interface
+
+Una classe che implementa un'interfaccia deve implementare tutti i suoi metodi per poter essere istanziata. Tuttavia, è possibile definire una classe che non implementa tutti i metodi dell'interfaccia, a condizione che la classe sia dichiarata astratta. 
+
+##### Class Members
+
+Una classe astratta può avere campi statici e metodi statici. Si possono usare questi membri statici con un riferimento ad una classe come per qualsiasi altra classe non astratta.
 
 
 
