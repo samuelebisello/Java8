@@ -712,7 +712,7 @@ Una sottoclasse eredita tutti i membri (campi, metodi e classi nidificate) dalla
 ##### What You Can Do in a Subclass
 
 Una sottoclasse eredita tutti i membri pubblici e protetti della sua classe padre, indipendentemente dal package in cui si trova la sottoclasse. Se la sottoclasse si trova nello stesso package della classe padre eredita anche i suoi membri con accesso package. Puoi utilizzare i membri ereditati così come sono, sostituirli, nasconderli o completarli con nuovi membri:
-* I campi ereditati possono essere utilizzati direttamente, proprio come qualsiasi altro campo. 
+* I campi ereditati possono essere utilizzati direttamente, proprio come qualsiasi altro campo.
 * E' possibile dichiarare un campo nella sottoclasse con lo stesso nome di quello nella superclasse (non consigliato), nascondendolo.
 * Si possono creare nuovi campi dati nella sotoclasse che non sono presenti nella superclasse
 * I metodi ereditati possono essere utilizzati direttamente così come sono
@@ -764,7 +764,7 @@ Se una sottoclasse definisce un metodo statico con la stessa firma di un metodo 
 
 La distinzione tra nascondere un metodo statico e fare un ovveride di un metodo di istanza ha risvolti importanti:
 
-* La versione del metodo di istanza sottoposto ad override che viene richiamato è quello della sottoclasse. 
+* La versione del metodo di istanza sottoposto ad override che viene richiamato è quello della sottoclasse.
 * La versione del metodo statico nascosto che viene richiamato dipende dal fatto che sia invocato dalla supercalsse o dalla sottoclasse.
 
 ##### Interface Methods
@@ -808,7 +808,7 @@ super();
 super(parameter list)
 ```
 
-Con `super()` viene chiamato il costruttore senza argomenti dell superclasse. Con `super(parameter list)` viene chiamato il costruttore della superclasse cun una lista di parametri corrispondente. 
+Con `super()` viene chiamato il costruttore senza argomenti dell superclasse. Con `super(parameter list)` viene chiamato il costruttore della superclasse cun una lista di parametri corrispondente.
 
 > **nota**: se un costruttore nella sottoclasse non richiama esplicitamente un costruttore nella superclasse, il compilatore Java inserisce automaticamente una chiamata al costruttorre senza argomenti della superclasse. Se la superclasse non ha un costruttore senza argomenti(per es. perchè ne è stato definito uno esplicitamente con uno o più parametri), allora si otterà un errore in fase di compilazione.
 
@@ -853,7 +853,7 @@ Il metodo`equals()` confronta 2 oggetti e ne verifica l'uguaglianza. Restituisce
 
 ##### The `getClass()` method
 
-Non è possibile fare override di questo metodo. Il metodo `getClass()` restituisce un oggett di tipo `Class`, cha ha metodi che è possibile utilizzare per ottenere informazioni sulla classe, come il suo nome, la sua superclasse e le interfacce implementate. 
+Non è possibile fare override di questo metodo. Il metodo `getClass()` restituisce un oggett di tipo `Class`, cha ha metodi che è possibile utilizzare per ottenere informazioni sulla classe, come il suo nome, la sua superclasse e le interfacce implementate.
 
 ##### The `hashCode` method
 
@@ -861,7 +861,7 @@ Il valore restituito da questo metodo è l'hash dell'oggetto, che è l'indirizzo
 Per definizione, se due oggetti sono uguali, anche il loro codice hash deve essere uguale. Se si esegue l'override del metodo `equals()` si modifica il modo in cui i due oggetti sono equivalenti e l'implementazione di `hashCode()` dell'oggetto non è più valida. Pertanto se si esegue l'override del metodo `equals()`, è necessario anche sovrascrivere il metodo `hashCode()`.
 
 
-##### The `toString()` Method 
+##### The `toString()` Method
 
 Dovresti sempre considerare di sovrascrivere il metodo toString () nelle tue classi.
 
@@ -870,12 +870,12 @@ Il metodo `toString()` dell'oggetto restituisce una rappresentazione in formato 
 
 #### Writing Final Classes and Methods
 
-Si possono dichiarare alcune o anche tutti i metodi di una classe `final`. Si usa la keyword `final` nella dichiarazione di un metodo che non potrà essere overraidato da una sua sottoclasse. S potrebbe bensare di rendere un metodo `final` se è implementato in modo tale che un override renda incoerente la classe. 
+Si possono dichiarare alcune o anche tutti i metodi di una classe `final`. Si usa la keyword `final` nella dichiarazione di un metodo che non potrà essere overraidato da una sua sottoclasse. S potrebbe bensare di rendere un metodo `final` se è implementato in modo tale che un override renda incoerente la classe.
 
 
 #### Abstract Method and Classes
 
-Una classe astratta è una classe che è dichiarata `abstract` (può includere o meno metodi astratti). Una classe astratta non 
+Una classe astratta è una classe che è dichiarata `abstract` (può includere o meno metodi astratti). Una classe astratta non
 può essere istanziata, ma può essere estesa da una sottoclasse.
 
 Un metodo astratto è un metodo dichiarato senza un'implementazione come questo:
@@ -889,7 +889,7 @@ Quando una classe astratta viene estesa da una sua sottclasse, la sottoclasse so
 
 > **nota**: I metodi nelle interfacce che non sono statici o di default sono implicitamente astratti, quindi non è necessario usare la keyword `abstract`.
 
-##### Abstract Classes Compared to Interfaces 
+##### Abstract Classes Compared to Interfaces
 
 Le classi astratte sono simili alle interfacce. Non è possibile istanziarle e possono contenere un mix di metodi con o senza un'implementazione. Tuttavia, con le classi astratte, è possibile dichiarare:
 * campi non statici e `final`
@@ -912,7 +912,7 @@ una classe astratta quando una di queste affermazioni si applica alla situazione
 
 ##### When an Abstract Class implements an Interface
 
-Una classe che implementa un'interfaccia deve implementare tutti i suoi metodi per poter essere istanziata. Tuttavia, è possibile definire una classe che non implementa tutti i metodi dell'interfaccia, a condizione che la classe sia dichiarata astratta. 
+Una classe che implementa un'interfaccia deve implementare tutti i suoi metodi per poter essere istanziata. Tuttavia, è possibile definire una classe che non implementa tutti i metodi dell'interfaccia, a condizione che la classe sia dichiarata astratta.
 
 ##### Class Members
 
@@ -922,23 +922,216 @@ Una classe astratta può avere campi statici e metodi statici. Si possono usare 
 
 ## Number and Strings
 
+
+
 ### Numbers
+
+### The Number Classes
+
+<p align="center">
+  <img src="/img/Number.png" width="350"/>
+</p>
+</br>
+
+Ci sono ragioni per cui è meglio usare oggetti Number invece che primitivi. La piattaforma Java offre classi `Wrapper` per ogni primitivo. Queste classi wrappano i primitivi in oggetti. Spesso il wrapping è effettuato dal compilatore:
+se si usa un tipo primtivo quando è atteso un oggetto, il compilatore `boxes` il primitivo nella sua classe wrapper automaticamente. Se invece si usa un oggetto quando è atteso un primitivo, il compilatore `unboxes` l'oggetto automaticamente.
+
+Ci sono **3** ragioni per cui si dovrebbe usare un Oggetto number invece di un primitivo:
+
+* Come argomento di un metodo che si aspetta un oggetto (spesso quando simanipola una collezione di numeri)
+
+* Per usare costanti definite da una classe, come per esempio `MIN_VALUE` e `MAX_VALUE`, che forniscono il limite inferiore e superiore del tipo di dato.
+
+* Per usare metodi di classe per convertire valori a/da altri tipi primitivi, per convertire a/da `String`, e per convertire tra sistemi numerici (decimale, ottale, esadecimale, binario)
+
+>**nota**: Tutte le sottoclassi di Number implementano il metodo `equals`. Due Number sono uguali se hanno stesso tipo  stesso valore numerico.
+
+
 
 ### Character
 
+Ci sono volte in cui è necessario utilizzare un `char` come oggetto, ad esempio come argomento del metodo in cui è previsto un oggetto. Il linguaggio di programmazione Java fornisce una classe wrapper che "avvolge" il carattere in un oggetto `Character` per questo scopo. Un oggetto di tipo `Character` contiene un singolo campo, il cui tipo è char. Questa classe di caratteri offre anche una serie di metodi di classe utili (cioè, statici) per manipolare i caratteri.
+
+Il compilatore Java può creare automaticamente, come nel caso di Number, un oggetto `Character` in alcune circostanze. Ad esempio, se si passa un carattere primitivo in un metodo che si aspetta un oggetto, il compilatore converte automaticamente il chare in un `Character`. Questa funzione è chiamata autoboxing o unboxing, se la conversione va nella direzione opposta.
+
+>**nota**: La classe CHaracter è immutabile; una volta creato, un `Character` non può essere cambiato.
+
+#### Escape Sequences
+
+Un `char` precduto da un backslash `\` è una sequenza di escape e ha un significato speciale per il compilatore.
+
+Escape Sequence|Descrizione
+---------------|-----------
+`\t`  | inserisce un tab
+`\b`  | inserisce uno spazio
+`\n`  | inserisce una nuova linea
+`\f`  | inserisce un formfeed
+`\'`  | inserisce a single quote
+`\"`  | inserisce a double quote
+`\\`  | inserisce un backslash
+
+
+
 ### Strings
+
+`Strings` sono sequenze di caratteri. In Java sono oggetti.
+
+```java
+String greeting = "Hello Wrold!";
+```
+In questo caso `Hello World!` è un litterale stringa (una serie di caratteri nel codice racchiusa tra doppi apici) Tutte le volte in cui si incontra un litterale stringa nel codice, il compilatore crea un oggetto Stringa con il suo valore (in questo caso `Hello World`).
+
+Come qualsiasi altro oggetto, si può creare oggetti `String` tramite `new` e un costruttore.
+
+>**nota**: La classe `String` è immutabile. Una volta creato un oggetto di tipo `String` non può essere modificato. La classe `String` contiene numerosi metodi che sembrano modificare la stringa di partenza. Tuttavia questi metodi in realtà creano un nuovo oggetto stringa a partire dal precedente.
+
+
 
 ### Autoboxing and Unboxing
 
+**Autoboxing** è la conversione automatica che il compilatore fa tra tipi primitivi ed i corrispondenti oggetti della classe wrapper.
+
+Il compilatore Java applica l'autoboxing quando un primitivo è:
+* passato come parametro ad un metodo che si aspetta un oggetto della corrispondente classe wrapper
+* assegnato ad una variabile della corrispondente classe wrapper
+
+L' **Unboxing** è la conversione di un oggetto di un tipo wrapper al suo corrispondente tipo primitivo.
+Il compilatore Java applica l'unboxing quando un oggetto wrapper è:
+* passato come parametro ad un metodo che si aspetta un valore del corrispondente tipo primitivo
+* assegnato ad una variabile del corrispondente tipo primitivo
+
+
 ## Generics
+
+### Why USe Generics?
+
+I generici consentono ai tipi di essere parametrizzati quando definiamo classi, interfacce e metodi. I parametri di tipo forniscono un modo per riusare lo stesso codice con differenti input. La differenza è che gli inpuit dei parametri formali sono valori, mentre gli input dei parametri di tipo so tipi.
+Il codice che utilizza i generics ha molti vantaggi rispetto al codice non-generics:
+
+* Controlli di tipo più potenti a tempo di compilazione: il compilatore Java applica un forte controllo di tipo al codice generico e genera errori se il codice viola la sicurezza del tipo. Correggere gli errori in fase di compilazione è più semplice che correggere errori a runtime
+
+* Eliminazione di cast:
+
+```java
+List list = new ArrayList();
+list.add("Hello");
+String s = (String) list.get(0);
+
+List<String> list = new ArrayList<String>();
+list.add("Hello");
+String s = list.get(0); // no cast
+```
+* Abilitano i programmatori ad implementare algoritmi generici
+
 
 ### Generics Types
 
-### Generics Methods
+Un tipo generico è un classe generica o interfaccia parametrizzata sui tipi.
+Una _classe generica_ è definita nella seguente forma:
+
+```java
+class name<T1, T2, ..., Tn> {/* ... */}
+```
+
+Un parametro di tipo può essere qualsiasi tipo **non primitivo**: qualsiasi classe, qualsiasi interfaccia, qualsiasi array. La stessa tecnica è usata per creare interfacce generiche.
+
+
+### Type Parameter Naming Convention
+
+Per convenzione, i parametri di tipo sono lettere singole maiuscole. Le elettere più usate sono:
+
+* E - Element
+* K - Key
+* N - Number
+* T - Type
+* V - Value
+* S, U, V etc. - 2nd, 3rd, 4th types
+
+
+### Invoking and Instantiating a Generic Type
+
+```java
+Class<Integer> integerClass;
+```
+
+In questo modo **dichiariamo** un riferimento ad una classe generica istanziata con Integer (è il type argument).
+
+>**nota**: `T` in `MyClass<T>` è un type parameter (parametro di tipo) mentre `Integer` in `MyClass<Integer> i` è un type argument (argomento di tipo).
+
+Per **istanziare** una classe generica, usiamo come sempre la keyword `new` con il type argument come nella dichiarazione.
+
+```java
+Class<Integer> integerClass = new Class<Integer>();
+```
+
+### The Diamond
+
+Con Java SE 7 è possibile sostituire gli argomenti di tipo richiesti per invocare il costruttore di una classe generica con un set vuoto di argomenti di tipo a condizione che il compilatore possa determinare o dedurre (infer) gli argomenti di tipo dal contesto (solitamente dalla dichiarazione).
+
+```java
+Class<Integer> integerClass = new Class<>();
+```
+
+
+### Raw Types
+
+Un **raw type** è il nome di una classe o interfaccia generica senza alcun argomento di tipo.
+
+```java
+public class MyClass<T> { /* ... */}
+MyClass class = new MyClass(); // raw type
+```
+
+In questo caso `MyClass` è un raw type del tipo generico `MyClass<T>`. Tuttavia una classe o interfaccia non generica **non** è un raw type.
+
+
+#### Unchecked Error Messages
+
+Il termine **Unchecked** significa che il compilatore non ha abbastanza informazioni per fare tutti i check di tipo necessari per assicurare la sicurezza sui tipi. Per vedere tutti i warning unchecked, ricompilare con `-Xlint:unchecked`.
+
+
+### Generic Methods
+
+Metodi generici sono metodi che introducono i loro propri parametri di tipo. È simile a dichiarare un tipo generico, ma lo scope del parametro di tipo è limitato a quello del metodo. Parametri di tipo sono permessi sia a metodi statici che non statici, nonchè a costruttori di classi generiche.
+
+La sintassi per un metodo generico include una lista di parametri di tipo, all'interno di parentesi angolari, la quale appare prima del metodo di ritorno del tipo. Per metodi generici statici, la sezione dei parametri di tipo **deve** apparire prima del tipo di ritorno del metodo.
+
+
 
 ### Bounded Type Parameters
 
+Ci sono situazioni in cui si vogliono restringere i tipi che possono essere usati come argomenti di tipo in un tipo parametrizzato. Questo è cioè che un parametro di tipo fa.
+
+Per dichiarare un parametro di tipo limitato si scrive il nome del parametro di tipo seguito dalla parola chiave `extends` seguita dal suo limite superiore (upper bound).
+
+```java
+public class MyClass<T extends Number> { /* ... */}
+```
+
+
+#### Multiple Bounds
+
+Un parametro di tipo può avere bounds multipli:
+
+```java
+public class MyClass<T extends A & B2 & B3> { /* ... */}
+
+class A { /* ... */ }
+interface B { /* ... */ }
+interface C { /* ... */ }
+```
+
+Una variabile di tipo T con bound multipli è un sottotipo di tutti i tipi presenti nella lista. Se uno di questi è una classe, deve essere specificata per prima.
+
+
+
 ### Generics, Inheritance and Subtypes
+
+#### Type Inference
+
+La type inference è la capacità del compilatore Java di guardare ogni invocazione di metodo e relativa dichiarazione per determinare l'argomento di tipo che rende l'invocazione applicabile.
+L'algortmo di deduzione determina i tipi degli argomenti e, se disponibile, il tipo al quale viene assegnato o restituito il risultato. Infine, l'algoritmo cerca di trovare il tipo più specifico che funzioni con tutti gli argomenti.
+
 
 ### Type inference
 
