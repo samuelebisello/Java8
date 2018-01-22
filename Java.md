@@ -1003,7 +1003,7 @@ Il compilatore Java applica l'unboxing quando un oggetto wrapper è:
 
 ## Generics
 
-### Why USe Generics?
+### Why Use Generics?
 
 I generici consentono ai tipi di essere parametrizzati quando definiamo classi, interfacce e metodi. I parametri di tipo forniscono un modo per riusare lo stesso codice con differenti input. La differenza è che gli inpuit dei parametri formali sono valori, mentre gli input dei parametri di tipo so tipi.
 Il codice che utilizza i generics ha molti vantaggi rispetto al codice non-generics:
@@ -1092,9 +1092,18 @@ Il termine **Unchecked** significa che il compilatore non ha abbastanza informaz
 
 ### Generic Methods
 
-Metodi generici sono metodi che introducono i loro propri parametri di tipo. È simile a dichiarare un tipo generico, ma lo scope del parametro di tipo è limitato a quello del metodo. Parametri di tipo sono permessi sia a metodi statici che non statici, nonchè a costruttori di classi generiche.
+Metodi generici sono metodi che introducono i loro propri parametri di tipo. È simile alla dichiarazione di un tipo generico, ma lo scope del parametro di tipo è limitato a quello del metodo. I parametri di tipo sono permessi sia a metodi statici che non statici, e anche a costruttori di classi generiche.
 
 La sintassi per un metodo generico include una lista di parametri di tipo, all'interno di parentesi angolari, la quale appare prima del metodo di ritorno del tipo. Per metodi generici statici, la sezione dei parametri di tipo **deve** apparire prima del tipo di ritorno del metodo.
+
+```java
+public class MyClass{
+    public static <K, V> boolean compare(Pair<K, V> p1, Pair<K, V> p2) {
+        return p1.getKey().equals(p2.getKey()) &&
+               p1.getValue().equals(p2.getValue());
+    }
+}
+```
 
 
 
@@ -1129,14 +1138,115 @@ Una variabile di tipo T con bound multipli è un sottotipo di tutti i tipi prese
 
 
 <p align="center">
-  <img src="/img/Number.png" width="350"/>
+  <img src="/img/generics-subtypeRelationship.gif" width="350"/>
 </p>
 </br>
 
+Box<Integer> e Box<Double> non sono sottotipi di Box<Numeber>.
 #### Type Inference
 
 La type inference è la capacità del compilatore Java di guardare ogni invocazione di metodo e relativa dichiarazione per determinare l'argomento di tipo che rende l'invocazione applicabile.
 L'algortmo di deduzione determina i tipi degli argomenti e, se disponibile, il tipo al quale viene assegnato o restituito il risultato. Infine, l'algoritmo cerca di trovare il tipo più specifico che funzioni con tutti gli argomenti.
+
+#### Type Inference and Generic Methods
+I metodi generici ci introducono alla type inference, la quale abilita all'invocazione di un metodo generico come se fosse un metodo ordinario, senza specificare un tipo tra parentesi angolari. 
+Per esempio:
+
+```java
+public static <U> void addBox(U u, List<Box<U>> boxes) {
+    Box<U> box = new Box<>();
+    box.set(u);
+    boxes.add(box);
+  }
+  
+  ...
+  
+  BoxDemo.<Integer>addBox(Integer.valueOf(10), listOfIntegerBoxes); // specificato parametro con un type witness
+  BoxDemo.addBox(Integer.valueOf(20), listOfIntegerBoxes); // omesso il type witness
+```
+
+Il metodo geenerico `addBox` definisce un parametro di tipo `U`. Generalmente il compilatore JAva può dedurre i parametri di tipo di una chiamata ad un metodo generico. Conseguentemente, nella maggior parte dei casi, non serve specificare il parametro di tipo (restituito in questo caso).
+
+
+#### Type inference and Instantiation of Generic Classes
+Si può replicare l'argomento di tipo richiesto per invocare il costruttore di una classe generica con un le parentesi angolari vuote. Il compilatore dedurra l'argomento di tipo dal contesto. 
+
+```java
+Map<String, List<String>> myMap = new HashMap<String, List<String>>();
+
+// questa dichiarazione è sostituibile con:
+
+Map<String, List<String>> myMap = new HasMap<>();
+```
+Se non si usano le parentesi angolari vuote, il compilatore genera un warning per converisione non verificata (unchecked conversion) in quanto il costruttore `HasMap()` si riferisce al __raw type__ `HasMap` e non a `Map<String, List<String>>`.
+
+#### Type Inference and Generic Constructors of Generic and Non-Generic Classes
+
+Nota che i metodi costruttori possono essere generci sia nelle classi generiche che in quelle non generiche. 
+
+```java
+class MyClass<X> {
+  <T> MyClass(T t) {
+    // ...
+  }
+}
+
+new MyClass<Integer>("");
+```
+
+L'ultimo statement crea un istanza del tipo parametrizzato `MyClass<Integer>`. Lo statement specifica esplicitamente il tipo `Integer` per il paramatro formale di tipo `X`, della classe generica `MyClass<X>`. Il costruttore per questa classe generica contiene un parametro formale di tipo `T`. Il compilatore deduce il tipo `String` per il parametro formale `T` del costruttore di questa classe generica perchè il parametro attuale di questo costruttore è di tipo String.
+
+I compilatori prima di Java SE 7 erano in grado di dedurre il tipo dei parametri attuali di costruttori generici, in maniera simile ai metodi generici. Tuttavia, i compilatori da Java SE 7 in poi possono dedurre i parametri di tipo attuali della classe generica che viene istanziata solo se si usano le parentesi angolari vuote `<>`. 
+
+```java
+MyClass<Integer> myObj = new MyClass<>("");
+```
+
+In questo esempio il compilatore deduce il tipo `Integer` per il parametro di tipo `X` della classe generica `MyClass<X>`. Inoltre deduce il tipo `String` per il parametro formale di tipo `T` per il costruttore della classe generica.
+
+
+#### Target Type
+Il compilatore Java sfrutta il tipo target per dedurre i parametri di una invocazione di un metodo generico. Il __tipo target__ di un' espressione è il tipo di dato che il compilatore si aspetta a seconda di dove appare quell'espressione.
+Per esempio la dichiarazione del metodo `Collections.emptyList();`
+
+```java
+static <T> List<T> emptyList();
+
+List<String> listOne = Collections.emptyList();
+```
+
+L'ultimo statement si aspetta un'istanza di `List<String>`. `List<String>` è il tipo target. Poichè il metodo `emptyList` ritorna un valore di tipo `List<T>`, il compilatore deduce che l'argomento di tipo `T` deve essere `String`. Questo meccanismo funziona in Java SE 7 e 8. Alternativamente si può usare un tipo witness e specificare il valore di `T` come nell'esempio qui sotto:
+
+```java
+List<Stirng> listOne = Collections.<String>emptyList();
+```
+
+Tuttavia non è necessario in questo contesto. E invece necessario in altri contesti. Considera il seguente esempio:
+
+```java
+void processListString(List<String> stringList) {
+// process stringList
+}
+```
+
+Si supponga di voler invocare il metodo `process StringList` con una lista vuota. In Java SE 7, il seguente statement non compila:
+
+```java
+processStringList(Collections.emptyList());
+```
+
+Il compilatore Java SE 7 richiede un valore per l'argomento di tipo `T` e inizia con il tipo `Object`. Successivamente, l'invocazione di `Collections.emptyList` ritorna un valore di tipo `List<Object>` che è incompatibile con con il metodo `processStringList` (tipo di ritorno List<String> incompatibile con List<Object>). Perciò in Java SE 7 si deve specificare il tipo del valore dell'argomento come nell'esempio sotto:
+  
+```java
+processStringList(Collections.<String>emptyList());
+```
+
+Questo non è necessario in Java 8. Il concetto di __"cos'è un tipo target"__ è stato esteso includendo gli argomenti di un metodo, come l'argomento del metodo `processStringList`. In questo caso, `processStringList` richiede un argomento di tipo `List<String>`. Il metodo `Collections.emptyList` ritorna un valore di tipo `List<T>` e usando il tipo target di `List<String>`, il compilatore deduce che l'argomento di tipo `T` ha valore di tipo `String`. Perciò in Java 8, il seguente statement compila:
+
+```java
+processStringList(Collections.emptyList());
+```
+
 
 
 ### Type inference
