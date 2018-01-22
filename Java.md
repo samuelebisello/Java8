@@ -1142,8 +1142,9 @@ Una variabile di tipo T con bound multipli è un sottotipo di tutti i tipi prese
 </p>
 </br>
 
-Box<Integer> e Box<Double> non sono sottotipi di Box<Numeber>.
-#### Type Inference
+`Box<Integer>` e `Box<Double>` non sono sottotipi di `Box<Numeber>`.
+
+### Type Inference
 
 La type inference è la capacità del compilatore Java di guardare ogni invocazione di metodo e relativa dichiarazione per determinare l'argomento di tipo che rende l'invocazione applicabile.
 L'algortmo di deduzione determina i tipi degli argomenti e, se disponibile, il tipo al quale viene assegnato o restituito il risultato. Infine, l'algoritmo cerca di trovare il tipo più specifico che funzioni con tutti gli argomenti.
@@ -1241,17 +1242,36 @@ Il compilatore Java SE 7 richiede un valore per l'argomento di tipo `T` e inizia
 processStringList(Collections.<String>emptyList());
 ```
 
-Questo non è necessario in Java 8. Il concetto di __"cos'è un tipo target"__ è stato esteso includendo gli argomenti di un metodo, come l'argomento del metodo `processStringList`. In questo caso, `processStringList` richiede un argomento di tipo `List<String>`. Il metodo `Collections.emptyList` ritorna un valore di tipo `List<T>` e usando il tipo target di `List<String>`, il compilatore deduce che l'argomento di tipo `T` ha valore di tipo `String`. Perciò in Java 8, il seguente statement compila:
+Questo non è necessario in Java 8. Il concetto di *"cos'è un tipo target"* è stato esteso includendo gli argomenti di un metodo, come l'argomento del metodo `processStringList`. In questo caso, `processStringList` richiede un argomento di tipo `List<String>`. Il metodo `Collections.emptyList` ritorna un valore di tipo `List<T>` e usando il tipo target di `List<String>`, il compilatore deduce che l'argomento di tipo `T` ha valore di tipo `String`. Perciò in Java 8, il seguente statement compila:
 
 ```java
 processStringList(Collections.emptyList());
 ```
 
 
-
-### Type inference
-
 ### Wildcards
+
+Nel codice generico, il punto di domando `?`, chiamato *wildcard*, rappresenta un tipo sconosciuto. Il wildcard può essere usato in molte situazioni:
+
+* come tipo di un parametro
+* campo dati o variabile locale
+* come tipo di ritorno
+
+Il wildcard non è mai usato come argomento di tipo per:
+
+* un invocazione di metodo generico
+* la creazione di un'istanza di una classe generica
+* come supertipo
+
+
+#### Upper Bounded Wildcards
+
+
+
+
+
+
+
 
 ### Type Erasure
 
