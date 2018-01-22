@@ -1127,6 +1127,12 @@ Una variabile di tipo T con bound multipli è un sottotipo di tutti i tipi prese
 
 ### Generics, Inheritance and Subtypes
 
+
+<p align="center">
+  <img src="/img/Number.png" width="350"/>
+</p>
+</br>
+
 #### Type Inference
 
 La type inference è la capacità del compilatore Java di guardare ogni invocazione di metodo e relativa dichiarazione per determinare l'argomento di tipo che rende l'invocazione applicabile.
