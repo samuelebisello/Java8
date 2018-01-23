@@ -1295,8 +1295,7 @@ public static void printList(List<Object> list) {
 }
 ```
 
-L'obiettivo di `printList`
- è quello di stampare una lista di un tipo qualsiasi, ma in questo caso non raggiunge l'obiettivo in quanto stampa solo istanze di `Objects`. Per scrivere un generico metodo `printList` usiamo `List<?>`:
+L'obiettivo di `printList` è quello di stampare una lista di un tipo qualsiasi, ma in questo caso non raggiunge l'obiettivo in quanto stampa solo istanze di `Objects`. Per scrivere un generico metodo `printList` usiamo `List<?>`:
  
  
 ```java
@@ -1361,11 +1360,212 @@ In quanto `List<? extends Integer>` è un sottotipo di `List<>? extends Number>`
 
 #### Wildcard Capture and Helper Methods
 
-In alcuni casi il compilatore deduce 
+In alcuni casi il compilatore deduce il tipo di un wildcard. Per esempio, una lista può essere definita come `List<?>`, ma quando viene valutata un'espressione, il compilatore deduce un particolare tipo a partire dal codice. Questa situazione si chiama *wildcard capture*.
 
+Solitamente non è c'è da preoccuparsi del wildcard capture, eccetto quando il compilatore produce messaggi che contengano la frase `capture of`. Per esempio:
+
+```java
+public class WildcardError {
+
+    void foo(List<?> i) {
+        i.set(0, i.get(0));
+    }
+}
+
+```
+
+In questa situazione il compilatroe processa il parametro `i` come di tipo `Object`. Quando il metodo `foo` invoca `List.set(int, E)`, il compilatore non è in grado di confermare il tipo dell'oggetto che deve essere inserito nella lista e viene prodotto un errore. Quando viene prodotto questo tipo di errore il compilatore crede che si stia assegnando un tipo sbagliato alla variabile. I generici sono stati aggiunti al linguaggio Java proprio per questa ragione, cioè per rafforzare la sicurezza del tipo a compile time.
+
+Nel seguente esempio si dimostra l'uso di un metodo privato helper che serve per risolvere il problema di quando si stanno facendo operazioni sicure ma a causa del wildcard capture viene segnalato un errore.
+
+```java
+public class WildcardFixed {
+
+    void foo(List<?> i) {
+        fooHelper(i);
+    }
+    
+    // Helper method created so that the wildcard can be captured
+    // through type inference.
+    private <T> void fooHelper(List<T> l) {
+        l.set(0, l.get(0));
+    }
+
+}
+```
+
+Grazie ad un metodo helper, il compiltore grazie alla type inference deduce che il tipo da determinare (capture variable) è `T`.
+
+Per convenzione, i metodi helper sono chiamati: `originalMethodNameHelper`.
+
+
+#### GuideLines for Wildcard Use
+
+Per lo scopo della seguente discussione è utile pensare una variabile come:
+
+* Una variabile "**In**": fornisce dati al codice. Per esempio il seguente metodo di copia con due argomenti: `copy(src, dest)`. L'argomento `src` fornisce i dati che saranno copiati, di conseguenza è il parametro "**In**".
+* Una variabile "**Out**": contiene i dati da usare altrove. Nell'esempio di copia l'argomento `dest` accetta i dati ed è il parametro"**Out**". 
+Naturalmente, alcune variabili vengono utilizzate sia per scopi "In" che "Out"
+
+Si può usare il principio "In" e "Out" qunado si decide se usare un wildcard e quale tipo di wildcard è più appropriato. La lista seguente fornisce le linee guida da seguire:
+
+* Una variabile "In" è definita con un upper bounded wildcard, usando la keyword `extends`
+* Una variabile  "Out" è definita con un lower bounded wildcard, usando la keyword `super` 
+* Nel caso in cui la variabile "In" può essere acceduta usando metodi definiti nella classe `Object`, si usi un unbounded wildcard
+* Nel caso in cui il codice necessiti di accedere ad una variabile e questa sia utilizzata sia per scopi "In" che "Out", allora non si deve usare un wildcard.
+
+Queste linee guida non si applicano ai tipi di ritorno di un metodo. Usare un wildcard come tipo di ritorno di un metodo dovrebbe essere evitato in quanto costringe i programmatori ad utilizzare il codice per gestire i wildcards (type checking).
 
 
 ### Type Erasure
+
+I generics sono stati introdotti nel linguaggio Java per fornire controlli di tipo più severi in fase di compilazione e per supportare la programmazione generica. Per implementare i generics, il compilatore Java applica la type erasure (cancellazione del tipo) per:
+
+* Riampiazzare tutti i parametri di tipo con il loro bound oppure `Object` se i parametri di tipo sono unbounded. Il bytecode prodotto perciò contiene solo classi ordinarie, interfacce e metodi
+* Inerire cast di tipo se necessario per preservare la sicurezza sul tipo
+* Generare metodi "ponte" per preservare il polimorfismo nei tipi generici estesi.
+
+> **Nota Bene**: La type erasure assicura che non vengano create nuove classi per tipi parametrici. Di conseguenza i generics non comportano nessun sovraccarico a runtime
+
+
+### Erasure of Generics Type
+
+Durante il processo di type erasure, il compilatore Java cancella tutti i parametri di tipo e li rimpiazza con il loro primo bound se il parametro è bounded oppure con `Object` se il parametro è unbounded.
+
+Consideriamo il seguente codice:
+
+```java
+public class Node<T> {
+
+    private T data;
+    private Node<T> next;
+
+    public Node(T data, Node<T> next) {
+        this.data = data;
+        this.next = next;
+    }
+
+    public T getData() { return data; }
+    // ...
+}
+```
+
+Poichè il parametro di tipo `T` è unbounded, il compilatore java lo rimpiazza con `Object`.
+
+
+```java
+public class Node {
+
+    private Object data;
+    private Node next;
+
+    public Node(Object data, Node next) {
+        this.data = data;
+        this.next = next;
+    }
+
+    public Object getData() { return data; }
+    // ...
+}
+```
+
+Nell'esempio seguente la classe nodo generica usa un parametro di tipo bounded:
+
+```java
+public class Node<T extends Comparable<T>> {
+
+    private T data;
+    private Node<T> next;
+
+    public Node(T data, Node<T> next) {
+        this.data = data;
+        this.next = next;
+    }
+
+    public T getData() { return data; }
+    // ...
+}
+```
+
+Il compilatore Java rimpiazza il parametro di tipo `T` con il primo bound associato, ossia `Comparable`:
+
+```java
+public class Node {
+
+    private Comparable data;
+    private Node next;
+
+    public Node(Comparable data, Node next) {
+        this.data = data;
+        this.next = next;
+    }
+
+    public Comparable getData() { return data; }
+    // ...
+}
+```
+
+
+#### Erasure of Generic Methods
+
+Il compilatore Java inoltre cancella i parametri di tipo negli argomenti di un metodo. si Consideri il seguente esempio:
+
+```java
+// Counts the number of occurrences of elem in anArray.
+//
+public static <T> int count(T[] anArray, T elem) {
+    int cnt = 0;
+    for (T e : anArray)
+        if (e.equals(elem))
+            ++cnt;
+        return cnt;
+}
+```
+Siccome `T` è unbounded, il compilatore Java replica `T` con Object:
+
+```java
+public static int count(Object[] anArray, Object elem) {
+    int cnt = 0;
+    for (Object e : anArray)
+        if (e.equals(elem))
+            ++cnt;
+        return cnt;
+}
+```
+
+#### Bridge Methods
+
+Quando viene compilata una classe o un interfaccia  che estende una classe parametrizzata o implementa un'interfaccia parametrizzata, il compilatore potrebbe aver bisogno di creare un *synthetic method*, chiamato un *metodo bridge* (bridge method), come parte del processo di cancellazione. Normalmente non è necessario preoccuparsi dei metodi bridge ma potrebbe crare perplessità la presenza di uno di questi in una stack trace.
+
+Dopo la cancellazione di tipo, le classi `Node` e `MyNode` diventano:
+
+```java
+public class Node {
+
+    public Object data;
+
+    public Node(Object data) { this.data = data; }
+
+    public void setData(Object data) {
+        System.out.println("Node.setData");
+        this.data = data;
+    }
+}
+
+public class MyNode extends Node {
+
+    public MyNode(Integer data) { super(data); }
+
+    public void setData(Integer data) {
+        System.out.println("MyNode.setData");
+        super.setData(data);
+    }
+}
+```
+Dopo la cancellazaione di tipo, la signatura del metodo `setData` non matcha. Il metodo della classe `Node` diventa `setData(Object)`, mentre il metodo della classe `MyNode` diventa `setData(Integer)`. PErciò, il metodo `setData` della classe `MyNode` non sovrascrive (override) il moetodo della classe `Node`.
+
+
+
 
 ### Restriction on Generics
 
