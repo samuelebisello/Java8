@@ -1598,10 +1598,10 @@ Per usare effetivamente i generics bisogna considerare le seguenti restrizioni:
 
 * Non si possono istanziare tipi generici con tipi primitivi
 * Non è possibile creare istanze di tipi parametrici
-  ```java
-  a[i]=new T(); // error
+```java
+a[i]=new T(); // error
   
-  ```
+```
 * Non è possibile dichiarare campi statici i cui tipi sono parametri di tipo: il campo statico di una classe è una variabile di classe e condivisa da tutti gli oggetti (non statici) appartenenti a quella classe. Di conseguenza, i campi statici di tipo parametrico non sono consentiti.
 
  ```java
