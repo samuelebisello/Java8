@@ -1,5 +1,7 @@
 # Java 8
 
+## Language Basics 
+
 ### Variables
 
 Java definisce i seguenti tipi di variabili:
@@ -15,7 +17,7 @@ la keyword final indichiamo che la variabile non verrà cambiata.
 spesso memorizza il suo stati temporaneo in variabile locali. Una variabile locale è visibile
 solo nel metodo in cui è stata dichiarata.
 
-* **Parametri**
+* **Parametri**: sono variabili argomenti di un metodo.
 
 ### Primitive Data Types
 
@@ -51,13 +53,15 @@ char       |  \u0000
 String     |  null
 boolean    | false
 
-**NB**: Per variabili locali il compilatore non assegna mai un valore di default, perciò prima di
+> **NB**: Per le variabili locali il compilatore non assegna mai un valore di default, perciò prima di
 usarle ricordati sempre di inizilizzarle. Accedere ad una variabile locale non inizializzata
 produce un errore di compilazione.
 
+## Classes and Objects
+
 ### Classes
 
-### Declaring Classes
+#### Declaring Classes
 
 Dichiarazione di una classe
 
@@ -71,7 +75,7 @@ class MyClass extends MySuperClass implements YourInterface {
 }
 ```
 
-### Methods
+#### Methods
 
 I metodi hanno 6 componenti:
 
@@ -123,7 +127,9 @@ I reference, come gli oggetti, sono passati per valore. Questo significa che qua
 il riferimento passato continua a riferirsi allo stesso oggetto di prima. Tuttavia i valori dei campi
 dell'oggetto possono essere modificati nel metodo, se hanno il livello di accesso appropriato.
 
-### Creating Objects
+### Objects
+
+#### Creating Objects
 
 ```java
 Point MyPoint = new Point(23,94);
@@ -134,7 +140,7 @@ Questo statement è costituito da tre parti:
 * **Instanziazione**
 * **Inizializzazione**
 
-#### #Dichiarazione
+##### Declaring a Variable to Refer to an Object
 
 Una dichiarazione associa un nome di variabile con un tipo di oggetto.
 
@@ -146,7 +152,7 @@ assegnato  ad esso. Dichiarare un varibile riferimento non crea un oggetto.
 
 
 
-#### #Instanziazione
+##### Instantiating a Class
 
 L'operatore `new` instanzia una classe allocando la memoria per un nuovo oggetto e ritorna un
 riferimento a quell'area di memoria. Invoca anche il costruttore dell'oggetto.
@@ -164,17 +170,20 @@ variabile ma può essere usato direttamente:
 int height = new MyPoint().height;
 ```
 
-#### #Inizializzazione
+##### Initializing an Object
 
 L'operatore `new` è seguito da una chiamata al construttore il quale inizializza il nuovo
 oggetto.
+
+
+### More On Classes
 
 #### Garbage Collector
 
 Un oggetto è eleggibile per il garabage collector quando non è più riferito da alcuna variabile.
 
 
-#### This Keyword
+#### Using the this Keyword
 
 In un metdodo di istanza o in un costruttore `this` è un riferimento all'oggetto corrente, ossia
 l'oggeto su cui viene chiamato il metodo o il costruttore.
@@ -183,7 +192,7 @@ All'interno di un costruttore si può usare la keyword `this` per chiamare un al
 nella stessa classe. Si tratta di una chiamata esplicita al costruttore.
 
 
-#### Control Access to Members of a Classe
+#### Controlling Access to Members of a Class
 
 I modificatori del livello di accesso determinano se un'altra classe può usare un particolare
 campo o invocare un particolare metodo. Ci sono due livelli di controllo d'accesso:
@@ -203,7 +212,7 @@ quello di una classe. Per i membri ci sono 2 modificatori aggiuntivi:
 una sottoclasse della classe in questione anche se si trova in un altro package.
 
 
-#### Acces Levels
+**Acces Level**
 
 Modificatore  | Classe  |Package   |Sottoclasse   |  Mondo
 --------------|---------|----------|--------------|--
@@ -220,7 +229,7 @@ La terza colonna indica se le sottoclassi della classe dichiarate all'esterno di
 hanno accesso al membro.
 La quarta colonna indica se tutte le classi hanno accesso al membro.
 
-##### Tips on Choosing an Acces Level
+**Tips on Choosing an Acces Level**
 
 Usa il modificatore di accesso più restrittivo che abbia senso per un particolare membro.
 * Usa`private` a meno che non ci sia un buon motivo per non farlo.
@@ -229,7 +238,10 @@ Usa il modificatore di accesso più restrittivo che abbia senso per un particola
 I campi marcati `public` tendono a vincolarti ad una particolare implementazione e limitare la
 in flessibilità nel modificare il codice.
 
-#### Class Variables [static]
+#### Understanding Class Members
+
+
+##### Class Variables [static]
 
 Campi dati dichiarati `static` sono chiamati campi dati statici o variabili di classe.
 Sono associati alla classe invece che ad un oggetto. Ogni istanza di una classe condivide una
@@ -243,7 +255,7 @@ Le variabili di classe sono referenziate dal nome della classe:
 ClassName.staticVariable;
 ```
 
-#### Class Methods
+##### Class Methods [static]
 
 I metodi statici, come per le variabili di classe, dovrebbero essere invocati con il nome
 della classe:
@@ -262,12 +274,10 @@ Non tutte le combinazioni di variabili di classe, di istanza e di metodi sono pe
 Devono usare un riferimento ad un oggetto. Inoltre, i metodi statici non possono usare la keyword
 `this` in quanto non vi è alcuna istanza a cui fare riferimento.
 
-#### Constants
+##### Constants
 
 Il modificatore `final` indica che il valore di quel campo **non** può cambiare.
-
 Il modificatore `static` in combinazione a `final`, viene usato per definire costanti.
-
 
 ```java
 static final double PI = 3.1415;
@@ -298,7 +308,7 @@ la gestione degli errori o altra logica.
 Per fornire le stessa capacità alle variabili di classe, Java include dei blocchi di
 inizializzazione statica.
 
-#### Static Initialization Blocks
+##### Static Initialization Blocks
 
 un blocco di inizializzazione statica è un normale blocco di codice racchiuso tra due `{ ... }`.
 
@@ -314,7 +324,7 @@ in qualsiasi punto del corpo della classe. Il sistema a runtime garantisce che i
 inizializzazione statica sono chiamati nell'ordine in cui appaiono nel codice.
 
 
-#### Initializing Instance Members
+##### Initializing Instance Members
 
 Solitamente inizializziamo una variabile d'istanza nel costruttore.
 Ci sono due alternative nell'usare un costruttore per inizilizzare una variabile d'istanza:
@@ -382,7 +392,7 @@ Validi motivi per usare le classi nidificate sono:
 
 * Può portare a un codice più leggibile e gestibile: L'inserimento di classi di piccole dimensioni all'interno di una classe di alto livello avvicina il codice a dove viene utilizzato.
 
-#### Inner Class
+#### Inner Classes
 
 Come per i metodi e le varibili di istanza, una classe interna è associata ad un'istanza della classe esterna e ha accesso diretto ai metodi e ai campi di quell'oggetto. Inoltre, poichè una classe interna è associata ad un'istanza, non può definire alcun membro statico.
 
@@ -444,7 +454,7 @@ Per esempio per creare un oggetto della classe statica nidificata:
 OuterClass.StaticNestedClass nestedObj = new OuterClass.StaticNestedClass();
 ```
 
-#### Shadowing
+##### Shadowing
 
 Se una dichiarazione di un tipo (come una variabile membro o un nome di un parametro) in un particolare scope (come in una classe interna o nella definizione di un metodo) ha lo stesso nome di un'altra dichiarazione di variabile in uno scope più esterno, allora la dichiarazione nello scope più interno nasconde quello nello scope più esterno.
 
@@ -469,7 +479,7 @@ public calss MyClass {
 }
 ```
 
-#### Accessing Members of an Enclosing Classe
+#### Accessing Members of an Enclosing Class
 
 Una classe locale ha accesso ai membri della classe che la contiene. In più una classe locale ha accesso alle variabili locali del blocco in cui è definita.
 
@@ -479,7 +489,7 @@ Tuttavia una classe locale può accedere solamente a variabili locali dichiarate
 
 Da Java 8 una classe locale può accedere a variabili locali e parametri del blocco in cui è definita che sono `final` o `effective final`. Una variabile o parametro il cui valore non è mai cambiato dopo la sua inizializzazione si dice `effective final`. Inoltre, sempre a partire da Java 8, se si dichiara una classe locale in un metodo, la classe può accedere i parametri del metodo.
 
-#### Shadowing and Local Classes
+**Shadowing and Local Classes**
 
 Dichiarazioni di un tipo (per es. una variabile) in una classe locale nasconde dichiarazioni di tipi con stesso nome dello scope più esterno.
 
@@ -698,6 +708,9 @@ Quando si desidera aggiungere funzionalità ad un interfacci (metodi), conviene 
 
 > **nota**: I metodi di default consentono di aggiungere nuove funzionalità alle interfacce delle librerie e garantire la compatibilità binaria con il codice scritto per le versioni precedenti di tali interfacce.
 
+
+
+
 ### Inheritance
 
 Ad eccezione della classe Object, che non ha una superclasse, ogni classe ha una sola superclasse diretta (ereditarietà singola). In assenza di qualsiasi altra superclasse esplicita, ogni classe è implicitamente una sottoclasse di Object.
@@ -709,7 +722,7 @@ L'idea di ereditarietà è semplice ma potente: quando vuoi creare una nuova cla
 Una sottoclasse eredita tutti i membri (campi, metodi e classi nidificate) dalla sua superclasse. I costruttori non sono membri, quindi non sono ereditati da sottoclassi, ma il costruttore della superclasse può essere invocato dalla sottoclasse.
 
 
-##### What You Can Do in a Subclass
+#### What You Can Do in a Subclass
 
 Una sottoclasse eredita tutti i membri pubblici e protetti della sua classe padre, indipendentemente dal package in cui si trova la sottoclasse. Se la sottoclasse si trova nello stesso package della classe padre eredita anche i suoi membri con accesso package. Puoi utilizzare i membri ereditati così come sono, sostituirli, nasconderli o completarli con nuovi membri:
 * I campi ereditati possono essere utilizzati direttamente, proprio come qualsiasi altro campo.
@@ -721,13 +734,13 @@ Una sottoclasse eredita tutti i membri pubblici e protetti della sua classe padr
 * Si possono dichiarare nuovi metodi nella sottoclasse che non superclasse
 * Si può scrivere un costruttore della sottoclasse che richiama il costruttore della superclasse, implicitamente o usando la keyword `super`.
 
-##### Private Member in a Superclass
+#### Private Member in a Superclass
 
 Una sottoclasse non eredita i membri `private` della sua superclasse diretta. Tuttavia, se la superclasse ha metodi marcati `public` o `protected` che accedono ai suoi campi privati, questi possono essere usati dalla sottoclasse.
 
 Una classe nidificata ha accesso a tutti i membri privati della classe che la contiene, sia campi dati che metodi. Perciò una classe nidificate marcata `public` o `protected` ereditata da una sottoclasse ha accesso indiretto a tutti i membri privati della superclasse.
 
-##### Casting Objects
+#### Casting Objects
 
 Il casting mostra l'uso di un oggetto di un tipo al posto di un altro tipo, tra gli oggertti consentiti dall'ereditarietà e dalle implementazioni.
 
@@ -922,11 +935,9 @@ Una classe astratta può avere campi statici e metodi statici. Si possono usare 
 
 ## Number and Strings
 
-
-
 ### Numbers
 
-### The Number Classes
+#### The Number Classes
 
 <p align="center">
   <img src="/img/Number.png" width="350"/>
