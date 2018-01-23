@@ -1266,10 +1266,102 @@ Il wildcard non è mai usato come argomento di tipo per:
 
 #### Upper Bounded Wildcards
 
+Si può usare un wildcard limitato superiormente (upper bounded wildcard) per "rilassare" le restrizioni su di una variabile. Per esempio se si vuole usare un metodo che lavori con `List<Integer>`, `List<Double>`, `List<Number>` lo si può fare usando un upper bounded wildcard.
+
+Per dichiarre un upper-bounded wildcard si usa il carattere `?` seguito dalla keyword `extends`, seguita dai suoi bound superiori. Si noti che in questo contesto la keyword `extends` è usata in senso generale e inculde sia `extends` che `implements`.
+
+Per scrivere un metodo che lavori correttamente su liste di `Number` e sottotipi di `Number`, come `Integer`, `Double` e `Float`, si dovrebbe specificare `List<? extends Number>`. Il termine `List<Number>` è più restrittivo perchè matcha solo con una lista di `Number` mentre il `List<? extends Number>` matcha con una lista di `Number` o di una qualsiasi sottoclasse di `Number`.
+
+```java
+public static void process(List<? extends Foo> list) 
+```
+
+Nello statement sopra l'upper bounded wildcard `<? extends Foo>`, dove `Foo` è un tipo qualsiasi, matcha con `Foo` ed un qualsiasi suo sottotipo.
+ 
+#### Unbounded Wildcards
+
+Il tipo Unbounded wildcards è specificato usando il carattere wildcard `?`, per esempio `List<?>`. Questa è chiamata una *lista di tipo sconosciuto*. Ci sono due scenari nei quali è buona pratica usare un unbounded wildcard:
+
+* Se si sta scrivendo un metodo che può essere implementato usando funzionalità fornite dalla classe `Object`
+* Quando il codice utilizza metodi nella classe genrica che **non** dipendono dal parametro di tipo; ad es. `List.size` o `List.clear`. Infatti, `Class<?>` è così spesso usata perchè la maggior parte dei metodi in `Class<T>`non dipende da `T`.
+
+Si consideri l'esempio:
+
+```java
+public static void printList(List<Object> list) {
+    for (Object elem : list)
+        System.out.println(elem + " ");
+    System.out.println();
+}
+```
+
+L'obiettivo di `printList`
+ è quello di stampare una lista di un tipo qualsiasi, ma in questo caso non raggiunge l'obiettivo in quanto stampa solo istanze di `Objects`. Per scrivere un generico metodo `printList` usiamo `List<?>`:
+ 
+ 
+```java
+public static void printList(List<?> list) {
+    for (Object elem: list)
+        System.out.print(elem + " ");
+    System.out.println();
+}
+```
+
+#### Lower Bounded Wildcards
+
+Un lower bounded wildcard restringe il tipo sconosciuto ad essere un tipo specifico o un supertipo di quel tipo.
+
+> **nota:** Non è possibile specificare contemporaneamente un upper bound e un lower bound per un wildcard.
+
+Per dichiarre un lower-bounded wildcard si usa il carattere `?` seguito dalla keyword `super`, seguita dai suoi bound inferiori.
+
+Per esempio se si vuole scrivere un metodo che inserisca oggetti di tipo `Integers` in una lista. Per massimizzarne la flessibilità si vuole che il metodo funzioni su liste di `Integer`, `Number`, `Object`, cioè qualsiasi cosa che possa contenere valori di tipo `Integer`. Il termine `List<Integer>` è più restrittivo di `List<? super Integer>`in quanto il primo matcha con una lista di `Integer` soltanto, mentre il secondo matcha con una lista di un qualsiasi supertipo di `Integer`.
 
 
+#### Wildcards e Subtyping
 
+Come descritto in Generics, Inheritance e Subtypes, le classi generiche o le interfaccenon sono correlate tra loro semplicemente perchè esiste una relazione tra i loro tipi. Tuttavia è possibile utilizzare i wildcards per creare una relazione tra classi generiche o interfacce.
 
+Date le due classi seguenti:
+
+```java
+class A {/* ... */}
+class B extends a {/* ... */}
+```
+
+E ragionevole scrivere il seguente codice:
+
+```java
+B b = new B();
+A a = b;
+```
+
+L'esempio mostra che l'ereditarietà per classi regolari segue le regole di sottotipaggio: la classe `B` è un sottotipo di `A` se `B` estende `A`. Questa regola **non** è applicabile ai tipi generici:
+
+```java
+List<B> lb = new ArrayList<>();
+List<A> la = lb; // compile-time error
+```
+
+Dato che `Integer` è un sottotipo do `Number` qual'è la possibile relazione tra `List<Integer>` e `List<Number>`
+
+<p align="center">
+  <img src="/img/Number.png" width="350"/>
+</p>
+</br>
+
+Anche se `Integer`è un sottotipo di `Number`, `List<Integer>` non è un sottotipo di `List<Number>` e i due tipi non sono correlati. Il supertipo comune di `List<Number>` e `List<Integer>` è `List<?>`. In modo da creare una relazione tra queste classi e quindi accedere ai metodi di `Number` attraverso elementi di `List<Integer>`, cioè attraverso `Integer`, si usa un upper bound wildcard:
+
+```java
+List<? extends Integer> intList = new ArrayList<>();
+List<>? extends Number> numList = initList;
+```
+
+In quanto `List<? extends Integer>` è un sottotipo di `List<>? extends Number>`
+
+#### Wildcard Capture and Helper Methods
+
+In alcuni casi il compilatore deduce 
 
 
 
