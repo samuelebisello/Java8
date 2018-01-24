@@ -1750,13 +1750,133 @@ Se un membro in un pacchetto condivide il suo nome con un membro in un altro pac
 ```java
 import static java.lang.Math.Pi; // individual static mamber
 
-import static java.lang.Math.* // all Maths's static members
+import static java.lang.Math.*; // all Maths's static members
 
 ```
 
 
 
 ## Exceptions
+
+### What Is an Exception?
+
+Il termine eccezione è un abbreviazione per *evento eccezionale*.
+
+> **Definizione:** Un eccezione è un evento, che si verifica durante l'esecuzione di un programma, che interrompe il normale flusso delle istruzioni del programma. Quando si verifica un errore all'interno di un metodo, il metodo crea un oggetto e lo consegna al sistema a runtime. L'oggetto, chiamato *exception object*, contiene informazioni circa l'errore, includendo il tipo e lo stato del programma quando l'errore si è verificato. La creazione di un exception object e la sua consegna al sistema a runtime è chiamato *throwing an exception* (lancio di un'eccezione).
+
+Dopo il lancio di un'eccezione da parte di un metodo, il sistema a runtime tenta  di trovare qualcosa per gestirlo. L'insieme delle possibile "cose" per gestire l'eccezione è l'elenco ordinato di metodi che sono stati chiamati per arrivare al metodo in cui si è verificato l'errore. L'elenco dei metodi è noto come *call stack* ()
+
+
+<p align="center">
+  <img src="/img/Number.png" width="350"/>
+</p>
+</br>
+
+
+Il sistema a runtime cerca nel call stack un metodo che contiene un blocco di codice in grado di gestire l'eccezione. Questo blocco di codice è chiamato *exception handler* (gestore delle eccezioni). La ricerca inizia dal metodo in cui si è verificato l'errore e prosegue attraverso il call stack nell'ordine inverso in cui sono stati chiamati i metodi. Quando viene trovato un exception handler appropriato, il sistema a runtime passa l'eccezione al gestore. Un exception handler è considerato appropriato se il tipo di un exception object generato corrisponde (matcha) al tipo che può essere gestito dal gestore dell'eccezione.
+
+Si dice che il gestore delle eccezioni scelto catturi (catch) l'eccezione. Se il sistema a runtime ricerca esaustivamente tutti i metodi sul call stack senza trovare un gestore dell eccezione appropriato, il sistema a runtime (e di conseguenza il programma) termina.
+
+
+<p align="center">
+  <img src="/img/Number.png" width="350"/>
+</p>
+</br>
+
+
+### The Catch or Specify Requirement
+
+Codice Java valido deve rispettare *the Catch or Specify Requirement*. QUesto significa che il codice che potrebbe generare delle eccezioni **deve** essere racchiuso tra uno dei seguenti:
+
+* Un `try` statement che cattura l'eccezione. Il blocco `try` deve fornire un gestore per l'eccezione.
+* Un metodo  che specifica che lui può lanciare un eccezione. il metodo deve fornire una clausola `throws` che elenca le eccezioni.
+
+Il codice che non rispetta *the Catch or Specify Requirement* non compila.
+
+#### The Three Kinds Of Exceptions 
+
+##### Checked Exception
+
+Il primo di tipo di eccezione è *checked exception*. Queste sono condizioni eccezionali che un applicazioni ben scritta dovrebbe prevedere e recuperare.
+
+> **Esempio:** Supponiamo che un'applicazione richieda all'utente un nome di file di input, quindi apre il file passando il nome al costruttore per `java.io.FileReader`. Normalmente, l'utente fornisce il nome di un file leggibile esistente, quindi la costruzione dell'oggetto `FileReader` ha esito positivo e l'esecuzione dell'applicazione procede normalmente. Ma a volte l'utente fornisce il nome di un file inesistente e il costruttore lancia `java.io.FileNotFoundException`.
+
+Un programma ben scritto inoltre dovrebbe catturare queste eccezioni e magari notificare l'utente del possibile errore. Checked exception sono soggette al *Catch or Specify Requirements*. Tutte le eccezioni sono di tipo *checked* tranne per quelle da `Error`, `RuntimeException` e tutte le loro sottoclassi.
+
+##### Errors (unchecked exceptions)
+
+Il secondo tipo di eccezione è *l'errore*. Ci sono condizioni eccezzionali *esterne* all'applicazione e che l'applicazione solitamente non è in grado di prevedere o ripristinare. Gli errori non sono soggetti al *Catch or Specify Requirements*.
+
+> **Esempio**: Supponiamo che un'applicazione apra con successo un file per l'input, ma non è in grado di leggere il file a causa di un malfunzionamento dell'hardware o del sistema. La lettura non riuscita genererà `java.io.IOError`. Un'applicazione potrebbe scegliere di rilevare questa eccezione, al fine di notificare all'utente il problema, ma potrebbe anche avere senso che il programma stampi una stack trace e poi termini.
+
+Gli errori sono quelle eccezioni indicate da `Error` e dalle sue sottoclassi.
+
+
+##### Runtime Exceptions (unchecked exceptions)
+
+Il terzo di ti eccezione è *runtime exception*. Ci sono condizioni eccezionali intenre all'applicazione, e che l'applicazione solitamente non può controllare o recuperare. Questi di solito indicano bugs di programmazione, come errori logici o uso improprio di un API. 
+
+> **Esempio:** Per esempio si consideri l'applicazione descritta precedentemente che passa un nome di un file al costruttore di `FileReader`. Se un errore logico fa in modo che venga passato `null`. come parametro al costruttore, il costruttore lancera una `UnllPointerException`. L'applicazione può gestire questa eccezione, ma probabilmente ha più senso eliminare il bug che ha causato l'eccezione.
+
+Runtime exceptions non sono soggette al *Catch or Specify Requirements*. Runtime exceptions sono quelle indicate da `RuntimeException` e dalle sue sottoclassi.
+
+**Errors e Runtime Exceptions sono noti collettivamente come *unchecked exceptions* **.
+
+### The `try` Block
+
+Il primo step nel costruire un gestore di un'eccezione è di racchiudere il codice che potrebbe lanciare un eccezzione in un blocco `try`:
+
+```java
+try {
+  // code
+}
+//catch and finally blocks...
+
+```
+
+Il frammento di codice `code` contiene una o più righe che potrebbero generare un'eccezione. 
+
+
+### The `catch` Blocks
+
+Si associano i gestori di eccezioni ad un blocco `try` fornendo uno o più blocchi `catch` immediatamente dopo il blocco `try`. Non può essere inserito del codice tra la fine di un blocco `try` e l'inizio del primo blocco `catch`:
+
+```java
+try {
+
+} catch (ExceptionType name) {
+
+} catch (ExceptionType name) {
+
+}
+```
+Ogni blocco `catch` è un gestore dell'eccezione che gestisce il tipo di eccezione indicata dal suo argomento. Il tipo dell' argomento, `ExceptionType`, dichiara il tipo di eccezione che il gestore può gestire e deve essere il nome di una classe che deriva dalla classe `Throwable`. Il gestore può fare riferiemento all'eccezione con `name`. 
+
+Il blocco `catch` contiene codice che viene eseguito se e quando viene invocato un gestore. Il sistema a runtime invoca il gestore dell'eccezione quando il gestore è il primo nel call stack il cui `ExceptionType` matchi il tipo dell'eccezione lanciata. Il sistema lo considera un match corretto se l'oggetto lanciato può legalmemte essere assegnato all'argomento del gestore delle eccezioni.
+
+#### Catching More Than One Type of Exception with One Exception Handler
+
+Da Java SE 7 e nelle versioni successive, un singolo blocco `catch` può gestire più di un tipo di eccezione. Questa funzione può ridurre la duplicazione del codice.
+
+Nella clausola `catch`, vanno specificati i tipi di eccezioni che il blocco può gestire e separare ogni tipo di eccezione con una barra verticale (|):
+
+```java
+catch (IOException|SLQException ex) {
+   logger.log(ex);
+   throw.ex;
+```
+
+> **Nota:** Se un blocco `catch` gestisce più di un tipo di eccezione, il parametro catch è implicitamente `final`. Nell'esempio sopra `ex` è marcato `final` e perciò non è possibile assegnare alcun valore ad esso all'interno del blocco catch.
+
+
+### The `finally` Block
+
+
+
+
+
+
+
 
 ## Basic I/O
 
