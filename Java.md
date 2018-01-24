@@ -1634,8 +1634,127 @@ void processList(List<T> v) {...}
 }
 
  ```
+## Packages
 
+### Creating and Using Packages
+
+Per rendere i tipi più facili da trovare ed usare, per evitare confiltti di nome e controllare l'accesso, i programmatori 
+raggruppano gruppi di tipi correlati in *packages*
+
+> **Definizione:** Un package è un raggruppamento di tipi correlati che fornisce protezione d'accesso e gestione dello spazio dei nomi.
+
+I tipi che fanno parte della piattaforma Java sono membri di vari pacchetti che raggruppano classi per funzione.
+Si dovrebbero raggruppare classi correlate in un package in quanto:
  
+* Si capisce facilmente che i tipi sono correlati
+* Si sa dove trovare le funzionalità relative alle classi del pacchetto essendo tutte raggruppate insieme
+* I nomi dei tipi non entrano in confiltto con i nomi dei tipi in altri packages in quanto un package crea un nuovo namespace
+* E possibile consentire ai tipi all'interno del package di avere accesso illimitato l'uno all'altro, ma limitare l'accesso per tipi esterni al package
+
+### Creating a Package
+
+Per creare un package, scegli un nome per il pacchetto (name conventions prossimo paragrafo) e inserisci il *package* statement con quel nome all'inizio di ogni file sorgente che contiene tipi (classi, interfacce, enumerazioni e annotazioni) che si vuole includere nel pacchetto.
+Ci può essere un solo package statement per ogni file sorgente e si applica a tutti i tipi nel file.
+
+```java
+//int the Rectangle.java file
+package graphics;
+
+public class Rectangle {
+    ...
+}
+```
+
+> **Nota:** Se si inseriscono più tipi in un singolo file sorgente (più classi ecc.), solo uno può essere marcato pubblico e **deve** avere lo stesso nome del file sorgente. Si possono includere tipi *non-public* nello stesso file di un tipo public (è fortemente sconsigliato), ma solo il tipo pubblico sarà accessibile dall'esterno del pacchetto. Gli altri tipi non-public saranno marcati di *package private*
+
+
+### Naming a Package
+
+Il nome dei package è scritto tutto in minuscolo per evitare conflitti con nomi di classi o interfacce.
+Le aziende usano il loro nome di dominio internet inverso per iniziare i nomi dei pacchetti: ad esempio `it.cashsrl.mypackage` per un pacchetto denominato *mypackage* creato da un programmatore su *cashsrl.it*.
+
+In alcuni casi, il nome di dominio Internet potrebbe non essere un nome di pacchetto valido. Ciò può verificarsi se il nome di dominio contiene un trattino o un altro carattere speciale, se il nome del pacchetto inizia con una cifra ecc. In questo caso, la convenzione suggerita è di aggiungere un carattere di sottolineatura. Per esempio:
+
+Domain Name|Package Name Prefix
+---------------|-----------
+hyphenated-name.example.org  | org.example.hyphenated_name
+example.int | int_.example
+123name.example.com | com.example._123name
+
+
+
+### Using Package Members
+
+I tipi che compongono un package sono noti come *membri del package*.
+Per usare un membro pubblico del package all'esterno del package, si deve fare una delle seguenti:
+
+* Fare riferimento al membro con il suo nome completo
+* Importare il membro del package
+* Importare l'intero pacchetto del membro
+
+Ognuno è appropriato per situazioni differenti, come spiegato di seguito.
+
+#### Referring to a Package Member by Its Qualified Name
+
+È possibile utilizzare il nome semplice di un membro del pacchetto se il codice che si sta scrivendo si trova nello stesso pacchetto di quel membro o se quel membro è stato importato. Tuttavia, se si sta tentando di utilizzare un membro da un pacchetto diverso e tale pacchetto non è stato importato, è necessario utilizzare il nome completo del membro, che include il nome del pacchetto:
+
+``` java
+graphics.Rectangle myRect = new graphics.Rectangle(); // no package import
+```
+
+#### Importing a Package Member
+
+Per importare uno specifico membro nel file corrente, si deve inserire un `import` statement all'inizio del file prima di qualsiasi definizione di tipo ma dopo lo statement di dichiarazione del package.
+
+
+```java
+import graphics.Rectangle;
+
+Rectangle myRect = new Rectangle();
+```
+
+Questo approccio va bene se si usa giusto qualche membro del package graphics. Se invece si usano molti tipi contenuti nel package allora si dovrebbe importare l'intero package.
+
+#### Importing an Entire Package
+
+Per importare tutti i tipi contenuti in un package, si usa lo statement di import con l'asterisco:
+
+```java
+import graphics.*;
+```
+
+Ora ci si può riferire a qualsiasi classe del package usando il suo nome semplice.
+> **Nota:** L'asterisco nell'istruzione di import può essere utilizzato solo per specificare tutte le classi all'interno di un package, come mostrato qui. Non può essere utilizzato per abbinare un sottoinsieme delle classi in un package.
+
+
+#### Apparent Hierarchies of Packages
+
+Apparentemente sembra che i packages siano gerarchici. Per esempio l'API JAva include un package `java.awt`, un package `java.awt.color`, `java.awt.font` ecc. Tuttavia tutti i packages `java.awt.xxxx` non sono inclusi nel pacchetto `java.awt`. Il prefisso `java.awt` (Java Abstract Window Toolkit) viene utilizzato per un numero di pacchetti correlati per rendere evidente la relazione, ma non per mostrare l'inclusione.
+
+L'importazione di `java.awt.*` importa tutti i tipi del pacchetto java.awt, ma non importa `java.awt.color`, `java.awt.font` o altri pacchetti `java.awt.xxxx`. Se si prevede di utilizzare classi e altri tipi in `java.awt.color` e in `java.awt`, è necessario importare entrambi i pacchetti con tutti i relativi file:
+
+```java
+import java.awt.*;
+import java.awt.color.*;
+
+```
+
+#### Name Ambiguities 
+
+Se un membro in un pacchetto condivide il suo nome con un membro in un altro pacchetto e entrambi i pacchetti sono importati, è necessario fare riferimento a ciascun membro tramite il suo nome qualificato.
+
+#### The Static Import Statement
+
+È possibile usare uno statement di import statico per importare membri statici di un package evitando di inserire come prefisso il nome della classe. Per esempio, per la classe `Math`:
+
+```java
+import static java.lang.Math.Pi; // individual static mamber
+
+import static java.lang.Math.* // all Maths's static members
+
+```
+
+
 
 ## Exceptions
 
