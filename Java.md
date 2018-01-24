@@ -1768,7 +1768,7 @@ Dopo il lancio di un'eccezione da parte di un metodo, il sistema a runtime tenta
 
 
 <p align="center">
-  <img src="/img/Number.png" width="350"/>
+  <img src="/img/exceptions-callstack.gif" width="350"/>
 </p>
 </br>
 
@@ -1779,7 +1779,7 @@ Si dice che il gestore delle eccezioni scelto catturi (catch) l'eccezione. Se il
 
 
 <p align="center">
-  <img src="/img/Number.png" width="350"/>
+  <img src="/img/exceptions-errorOccurs.gif" width="350"/>
 </p>
 </br>
 
