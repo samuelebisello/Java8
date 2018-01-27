@@ -1974,7 +1974,7 @@ La `java.io` è divisa in due gerarchie di classi importanti a seconda del dato 
 
 
 <p align="center">
-  <img src="/img/javaIO.png" width="350"/>
+  <img src="/img/javaIO.png" width="500"/>
 </p>
 </br>
 
