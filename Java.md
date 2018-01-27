@@ -1979,8 +1979,15 @@ La `java.io` è divisa in due gerarchie di classi importanti a seconda del dato 
 </br>
 
 
+**Data sink Streams:** funzionalità per lettura/scrittura da un supporto (es. rete, memoria, file). **Tipi**: memoria, file, pipe.
+**Byte stream Input:**: `FileInputStream`, `PipedInputStream`, `ByteArrayInputStream`, `StringBufferInputStream`,
+**Byte stream Output:** `FileOutpuStream`, `PipedOutputStream`, `ByteArrayOutputStream`.
+**Character stream Input:**: `CharArrayReader`, `FileReader`, `PipedReader`, `StringReader`
+**Character stream Output:** `CharArrayWriter`, `FileWriter`, `PipedWriter`, `StringWriter`
 
-### image gerarchio I/O
+**Processing streams:** usati in congiunzione ai data sink streams per aggiungere ulteriori funzionalità. **Tipi**: bufferizzate, data, Object I/O.
+
+
 
 
 
@@ -2093,6 +2100,134 @@ Ci sono 4 classi di streram bufferizzati usate per wrappare stream non bufferizz
 
 Spesso ha senso fare in modo che tutto il contenuto del buffer vengo scritto senza aspettare che si riempia. Questo è conosciuto come *flushing the buffer*. Alcune classi di output bufferizzate supportano l'autoflush, specificato da un argomento opzionale del costruttore. Quando l'autoflush è abilitato, alcuni eventi chiave causano ol flush del buffer. Per esempio, un oggetto autoflush `PrinterWriter` flusha il buffer ad ogni invocazione di `println` o `format`.
 Per flushare uno stream manualmente bisogna invocare il suo metodo `flush`. Il metodo `flush` è valido per qualsiasi stream di output, ma non ha effetto se lo stream non è bufferizzato.
+
+
+### Scanning and Formatting
+
+La programmazione I/O spesso implica la traduzione da e verso dati ben formattati con cui gli umani amano lavorare. Per assistere i programmatori relativamente a queste faccende, la piattaforma Java fornisce due API. La `scanner` API spezza l'input in **tokens** associati ai bits di dati. La `formatting` API assembla i dati in forma piacevolmente leggibile, in forma leggibile per gli "umani".
+
+#### Scanning
+
+Gli oggetti di tipo `Scanner` sono utili per spezzare input formattati in tokens e tradurre i singoli token in base al loro tipo di dati
+
+
+> **Definizione:** I tokens sono i vari elementi di un programma Java che sono identificati dal compilatore. Un token il più piccolo elemtno di un programma significativo per il compilatore. I token supportati in Java includono keywords, variabili, costanti, caratteri speciali, operazioni ecc.
+
+
+<p align="center">
+  <img src="/img/byteStream.gif" width="350"/>
+</p>
+</br>
+
+
+##### Breaking Input into Tokens
+
+Di default, uno scanner usa gli spazi bianchi per separare i tokens. (Un carattere bianco include blanks, tabs e terminatore di linea. Vedi `Character.isWhitespace`). Per vedere come uno scanner lavora, vediamo il seguente esempio.
+
+```java
+import java.io.*;
+import java.util.Scanner;
+
+public class ScanXan {
+    public static void main(String[] args) throws IOException {
+
+        Scanner s = null;
+
+        try {
+            s = new Scanner(new BufferedReader(new FileReader("xanadu.txt")));
+
+            while (s.hasNext()) {
+                System.out.println(s.next());
+            }
+        } finally {
+            if (s != null) {
+                s.close();
+            }
+        }
+    }
+}
+```
+Si noti che `ScanXan` invoca il metodo `close` quando ha finito con l'oggetto scanner. Anche se uno scanner non è uno stream, è necessario chiuderelo per indicare che si è finito di lavorare con lo stream sottostante.
+
+L'output di `ScanXan` è il seguente:
+
+```java
+In
+Xanadu
+did
+Kubla
+Khan
+A
+stately
+pleasure-dome
+...
+```
+
+Per usare un differente separatore di tokem, si invochi `useDelimeter()`, specificando un'espressione regolare.
+
+##### Translating INdividual Tokens
+
+L'esmepio qui sopra tratta tutti gli input tokens come semplici stringhe di valori. Uno scanner supporta anche tokens per tutti i tipi primitivi del linguaggio Java, ade eccezione di `char`, `BigInteger e BigDecimal`
+
+
+#### Formatting
+
+Gli oggetti stream che implementato la formattazione sono istanze di `PrintWriter`, una classe di stream di caratteri, o `PrintStream`, una classe di byte stream.
+
+> **Nota:**  Gli unici oggetti di tipo `PrintStream` di cui si ha probabilmente bisogno sono `System.out` e `System.err`. Quando si ha bisogno di creare un output stream formattato, è consigliato istanziare `PrintWriter` e non `PrintStream`.
+
+Come per tutti gli oggetti di stream di byte o di caratteri,le istanze di `PrintWriter` e `PrintStream` implementano un set standard di metodi di scrittura per output di semplici byte o di caratteri. In più, sia `PrintWriter` che `PrintStream` implementano lo stesso insieme di metodi per convertire dati interni in output formattato. SOno disponibili due livelli di formattazione:
+
+* `print` e `println` formattano singoli valori in modo standard
+* `format` formatta quasi qualsiasi numero o valore basato su un formato stirnga, con molte opzioni per formattazioni precise.
+
+```java
+System.out.format("The square root of %d is %f.%n", i, r);
+```
+
+Tutti gli specificatori di formato iniziano con `%` e terminano con una conversione di 1 o 2 caratteri che specifica il tipo di output formattato generato. Le tre conversioni utilizzate qui sono:
+
+* `d` formatta un valore intero come valore decimale
+* `f` fomratta un valore in virgola mobile come valore decimale
+* `n` stampa un terminatore di linea specifico per la piattaforma
+
+Altre conversioni:
+
+* `x` formatta un numero intero come un valore esadecimale
+* `s` formatta qualsiasi valore come stringa
+
+
+### I/O from the COmmand Line
+
+Un programma viene spesso eseguito da riga di comando e interagisce con l'utente dariga di comando. La piattaforma Java supporta questo tipo di interazione in due modi: attraverso stream standard e attraverso la console.
+
+#### Standard Streams
+
+Gli standard stream sono una funzionalità di molti sistemi operativi. Di default, leggono l'input dalla tastiera e scrivono l'output sul display. Inoltre supportano L'I/O su file e tra programmi, ma tale funzionalità è controllata dall'interprete della riga di comando, non dal programma.
+
+
+La piattaforma Java supporta tre stream standard:
+
+* **Standard Input** accessibili tramite `System.in`
+* **Standard Output** accessibile tramite `System.out`
+* **Standard Error** accessibile tramite `System.err`
+
+Questi oggetti sono definiti automaticamente e non devono essere aperti. Standard Output e Standard Error sono entrambi di output. Ci si potrebbe aspettare che gli stram standard siano stream di caratteri, ma, per ragioni storiche, sono stream di byte. `System.out` e `System.err` sono definiti come oggetti `PrintStream`. Sebbene sia tecnicamente uno stream di byte, `PrintStream` utilizza un oggetto di character stream interno per emulare molte delle caratteristiche degli stream di caratteri. Al contrario `System.in` è uno stram di byte senza funzionalità di stream di caratteri. Per utilizzare l'input standard come stream di carattere basta wrappare `System.in` in `inputStreamReader`.
+
+
+### Data Streams
+
+Data Streams supportano I/O binario di valori di tipo primitivo (`boolean`, `char`, `byte`, `short`, `int`, `long`, `float`, and `double`) come anche valori di tipo `String`. Tutti i data stream implementano l'interfaccia `DataInput` o l'interfaccia `DataOutput`.
+
+
+### Objects Streams
+
+Proprio come gli stream di dati supportano I/O di tipi di dati primitivi, gli stream di oggetti supportano I/O di oggetti. La maggior parte, ma non tutte, delle classi standard supportano la serializzazione dei loro oggetti, ossia implementano la marker interface Serializable.
+
+Le classi di stream di oggetti sono `ObjectInputStream` e `ObjectOutputStream`. Queste classi implementano `ObjectInput` e `ObjectOutput`, che sono sottointerfacce di `DataInput` e `DataOutput`. Questo significa che tutti i metodi di I/O di dati primitivi trattati in `DataStreams` sono implementati anche negli stream di oggetti. Di conseguenza uno stream di oggetti può contenere un mix di valori primitivi e oggetti.
+
+
+### File
 
 
 ## Concurrency
