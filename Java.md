@@ -1,6 +1,6 @@
 # Java 8
 
-## Language Basics 
+## Language Basics
 
 ### Variables
 
@@ -1161,7 +1161,7 @@ La type inference è la capacità del compilatore Java di guardare ogni invocazi
 L'algortmo di deduzione determina i tipi degli argomenti e, se disponibile, il tipo al quale viene assegnato o restituito il risultato. Infine, l'algoritmo cerca di trovare il tipo più specifico che funzioni con tutti gli argomenti.
 
 #### Type Inference and Generic Methods
-I metodi generici ci introducono alla type inference, la quale abilita all'invocazione di un metodo generico come se fosse un metodo ordinario, senza specificare un tipo tra parentesi angolari. 
+I metodi generici ci introducono alla type inference, la quale abilita all'invocazione di un metodo generico come se fosse un metodo ordinario, senza specificare un tipo tra parentesi angolari.
 Per esempio:
 
 ```java
@@ -1170,9 +1170,9 @@ public static <U> void addBox(U u, List<Box<U>> boxes) {
     box.set(u);
     boxes.add(box);
   }
-  
+
   ...
-  
+
   BoxDemo.<Integer>addBox(Integer.valueOf(10), listOfIntegerBoxes); // specificato parametro con un type witness
   BoxDemo.addBox(Integer.valueOf(20), listOfIntegerBoxes); // omesso il type witness
 ```
@@ -1181,7 +1181,7 @@ Il metodo geenerico `addBox` definisce un parametro di tipo `U`. Generalmente il
 
 
 #### Type inference and Instantiation of Generic Classes
-Si può replicare l'argomento di tipo richiesto per invocare il costruttore di una classe generica con un le parentesi angolari vuote. Il compilatore dedurra l'argomento di tipo dal contesto. 
+Si può replicare l'argomento di tipo richiesto per invocare il costruttore di una classe generica con un le parentesi angolari vuote. Il compilatore dedurra l'argomento di tipo dal contesto.
 
 ```java
 Map<String, List<String>> myMap = new HashMap<String, List<String>>();
@@ -1194,7 +1194,7 @@ Se non si usano le parentesi angolari vuote, il compilatore genera un warning pe
 
 #### Type Inference and Generic Constructors of Generic and Non-Generic Classes
 
-Nota che i metodi costruttori possono essere generci sia nelle classi generiche che in quelle non generiche. 
+Nota che i metodi costruttori possono essere generci sia nelle classi generiche che in quelle non generiche.
 
 ```java
 class MyClass<X> {
@@ -1208,7 +1208,7 @@ new MyClass<Integer>("");
 
 L'ultimo statement crea un istanza del tipo parametrizzato `MyClass<Integer>`. Lo statement specifica esplicitamente il tipo `Integer` per il paramatro formale di tipo `X`, della classe generica `MyClass<X>`. Il costruttore per questa classe generica contiene un parametro formale di tipo `T`. Il compilatore deduce il tipo `String` per il parametro formale `T` del costruttore di questa classe generica perchè il parametro attuale di questo costruttore è di tipo String.
 
-I compilatori prima di Java SE 7 erano in grado di dedurre il tipo dei parametri attuali di costruttori generici, in maniera simile ai metodi generici. Tuttavia, i compilatori da Java SE 7 in poi possono dedurre i parametri di tipo attuali della classe generica che viene istanziata solo se si usano le parentesi angolari vuote `<>`. 
+I compilatori prima di Java SE 7 erano in grado di dedurre il tipo dei parametri attuali di costruttori generici, in maniera simile ai metodi generici. Tuttavia, i compilatori da Java SE 7 in poi possono dedurre i parametri di tipo attuali della classe generica che viene istanziata solo se si usano le parentesi angolari vuote `<>`.
 
 ```java
 MyClass<Integer> myObj = new MyClass<>("");
@@ -1248,7 +1248,7 @@ processStringList(Collections.emptyList());
 ```
 
 Il compilatore Java SE 7 richiede un valore per l'argomento di tipo `T` e inizia con il tipo `Object`. Successivamente, l'invocazione di `Collections.emptyList` ritorna un valore di tipo `List<Object>` che è incompatibile con con il metodo `processStringList` (tipo di ritorno List<String> incompatibile con List<Object>). Perciò in Java SE 7 si deve specificare il tipo del valore dell'argomento come nell'esempio sotto:
-  
+
 ```java
 processStringList(Collections.<String>emptyList());
 ```
@@ -1284,11 +1284,11 @@ Per dichiarre un upper-bounded wildcard si usa il carattere `?` seguito dalla ke
 Per scrivere un metodo che lavori correttamente su liste di `Number` e sottotipi di `Number`, come `Integer`, `Double` e `Float`, si dovrebbe specificare `List<? extends Number>`. Il termine `List<Number>` è più restrittivo perchè matcha solo con una lista di `Number` mentre il `List<? extends Number>` matcha con una lista di `Number` o di una qualsiasi sottoclasse di `Number`.
 
 ```java
-public static void process(List<? extends Foo> list) 
+public static void process(List<? extends Foo> list)
 ```
 
 Nello statement sopra l'upper bounded wildcard `<? extends Foo>`, dove `Foo` è un tipo qualsiasi, matcha con `Foo` ed un qualsiasi suo sottotipo.
- 
+
 #### Unbounded Wildcards
 
 Il tipo Unbounded wildcards è specificato usando il carattere wildcard `?`, per esempio `List<?>`. Questa è chiamata una *lista di tipo sconosciuto*. Ci sono due scenari nei quali è buona pratica usare un unbounded wildcard:
@@ -1307,8 +1307,8 @@ public static void printList(List<Object> list) {
 ```
 
 L'obiettivo di `printList` è quello di stampare una lista di un tipo qualsiasi, ma in questo caso non raggiunge l'obiettivo in quanto stampa solo istanze di `Objects`. Per scrivere un generico metodo `printList` usiamo `List<?>`:
- 
- 
+
+
 ```java
 public static void printList(List<?> list) {
     for (Object elem: list)
@@ -1395,7 +1395,7 @@ public class WildcardFixed {
     void foo(List<?> i) {
         fooHelper(i);
     }
-    
+
     // Helper method created so that the wildcard can be captured
     // through type inference.
     private <T> void fooHelper(List<T> l) {
@@ -1415,13 +1415,13 @@ Per convenzione, i metodi helper sono chiamati: `originalMethodNameHelper`.
 Per lo scopo della seguente discussione è utile pensare una variabile come:
 
 * Una variabile "**In**": fornisce dati al codice. Per esempio il seguente metodo di copia con due argomenti: `copy(src, dest)`. L'argomento `src` fornisce i dati che saranno copiati, di conseguenza è il parametro "**In**".
-* Una variabile "**Out**": contiene i dati da usare altrove. Nell'esempio di copia l'argomento `dest` accetta i dati ed è il parametro"**Out**". 
+* Una variabile "**Out**": contiene i dati da usare altrove. Nell'esempio di copia l'argomento `dest` accetta i dati ed è il parametro"**Out**".
 Naturalmente, alcune variabili vengono utilizzate sia per scopi "In" che "Out"
 
 Si può usare il principio "In" e "Out" qunado si decide se usare un wildcard e quale tipo di wildcard è più appropriato. La lista seguente fornisce le linee guida da seguire:
 
 * Una variabile "In" è definita con un upper bounded wildcard, usando la keyword `extends`
-* Una variabile  "Out" è definita con un lower bounded wildcard, usando la keyword `super` 
+* Una variabile  "Out" è definita con un lower bounded wildcard, usando la keyword `super`
 * Nel caso in cui la variabile "In" può essere acceduta usando metodi definiti nella classe `Object`, si usi un unbounded wildcard
 * Nel caso in cui il codice necessiti di accedere ad una variabile e questa sia utilizzata sia per scopi "In" che "Out", allora non si deve usare un wildcard.
 
@@ -1611,7 +1611,7 @@ Per usare effetivamente i generics bisogna considerare le seguenti restrizioni:
 * Non è possibile creare istanze di tipi parametrici
 ```java
 a[i]=new T(); // error
-  
+
 ```
 * Non è possibile dichiarare campi statici i cui tipi sono parametri di tipo: il campo statico di una classe è una variabile di classe e condivisa da tutti gli oggetti (non statici) appartenenti a quella classe. Di conseguenza, i campi statici di tipo parametrico non sono consentiti.
 
@@ -1629,7 +1629,7 @@ public class MobileDevice<T> {
 
  ```java
 public class UseList<W, T> {
-void processList(List<W> v) {...} 
+void processList(List<W> v) {...}
 void processList(List<T> v) {...}
 }
 
@@ -1638,14 +1638,14 @@ void processList(List<T> v) {...}
 
 ### Creating and Using Packages
 
-Per rendere i tipi più facili da trovare ed usare, per evitare confiltti di nome e controllare l'accesso, i programmatori 
+Per rendere i tipi più facili da trovare ed usare, per evitare confiltti di nome e controllare l'accesso, i programmatori
 raggruppano gruppi di tipi correlati in *packages*
 
 > **Definizione:** Un package è un raggruppamento di tipi correlati che fornisce protezione d'accesso e gestione dello spazio dei nomi.
 
 I tipi che fanno parte della piattaforma Java sono membri di vari pacchetti che raggruppano classi per funzione.
 Si dovrebbero raggruppare classi correlate in un package in quanto:
- 
+
 * Si capisce facilmente che i tipi sono correlati
 * Si sa dove trovare le funzionalità relative alle classi del pacchetto essendo tutte raggruppate insieme
 * I nomi dei tipi non entrano in confiltto con i nomi dei tipi in altri packages in quanto un package crea un nuovo namespace
@@ -1739,7 +1739,7 @@ import java.awt.color.*;
 
 ```
 
-#### Name Ambiguities 
+#### Name Ambiguities
 
 Se un membro in un pacchetto condivide il suo nome con un membro in un altro pacchetto e entrambi i pacchetti sono importati, è necessario fare riferimento a ciascun membro tramite il suo nome qualificato.
 
@@ -1793,7 +1793,7 @@ Codice Java valido deve rispettare *the Catch or Specify Requirement*. QUesto si
 
 Il codice che non rispetta *the Catch or Specify Requirement* non compila.
 
-#### The Three Kinds Of Exceptions 
+#### The Three Kinds Of Exceptions
 
 ##### Checked Exception
 
@@ -1814,7 +1814,7 @@ Gli errori sono quelle eccezioni indicate da `Error` e dalle sue sottoclassi.
 
 ##### Runtime Exceptions (unchecked exceptions)
 
-Il terzo di ti eccezione è *runtime exception*. Ci sono condizioni eccezionali intenre all'applicazione, e che l'applicazione solitamente non può controllare o recuperare. Questi di solito indicano bugs di programmazione, come errori logici o uso improprio di un API. 
+Il terzo di ti eccezione è *runtime exception*. Ci sono condizioni eccezionali interne all'applicazione, e che l'applicazione solitamente non può controllare o recuperare. Questi di solito indicano bugs di programmazione, come errori logici o uso improprio di un API.
 
 > **Esempio:** Per esempio si consideri l'applicazione descritta precedentemente che passa un nome di un file al costruttore di `FileReader`. Se un errore logico fa in modo che venga passato `null`. come parametro al costruttore, il costruttore lancera una `UnllPointerException`. L'applicazione può gestire questa eccezione, ma probabilmente ha più senso eliminare il bug che ha causato l'eccezione.
 
@@ -1834,7 +1834,7 @@ try {
 
 ```
 
-Il frammento di codice `code` contiene una o più righe che potrebbero generare un'eccezione. 
+Il frammento di codice `code` contiene una o più righe che potrebbero generare un'eccezione.
 
 
 ### The `catch` Blocks
@@ -1850,9 +1850,10 @@ try {
 
 }
 ```
-Ogni blocco `catch` è un gestore dell'eccezione che gestisce il tipo di eccezione indicata dal suo argomento. Il tipo dell' argomento, `ExceptionType`, dichiara il tipo di eccezione che il gestore può gestire e deve essere il nome di una classe che deriva dalla classe `Throwable`. Il gestore può fare riferiemento all'eccezione con `name`. 
+Ogni blocco `catch` è un gestore dell'eccezione che gestisce il tipo di eccezione indicata dal suo argomento. Il tipo dell' argomento, `ExceptionType`, dichiara il tipo di eccezione che il gestore può gestire e deve essere il nome di una classe che deriva dalla classe `Throwable`. Il gestore può fare riferiemento all'eccezione con `name`.
 
 Il blocco `catch` contiene codice che viene eseguito se e quando viene invocato un gestore. Il sistema a runtime invoca il gestore dell'eccezione quando il gestore è il primo nel call stack il cui `ExceptionType` matchi il tipo dell'eccezione lanciata. Il sistema lo considera un match corretto se l'oggetto lanciato può legalmemte essere assegnato all'argomento del gestore delle eccezioni.
+
 
 #### Catching More Than One Type of Exception with One Exception Handler
 
@@ -1864,6 +1865,7 @@ Nella clausola `catch`, vanno specificati i tipi di eccezioni che il blocco può
 catch (IOException|SLQException ex) {
    logger.log(ex);
    throw.ex;
+ }
 ```
 
 > **Nota:** Se un blocco `catch` gestisce più di un tipo di eccezione, il parametro catch è implicitamente `final`. Nell'esempio sopra `ex` è marcato `final` e perciò non è possibile assegnare alcun valore ad esso all'interno del blocco catch.
@@ -1871,14 +1873,227 @@ catch (IOException|SLQException ex) {
 
 ### The `finally` Block
 
+Un blocco `finally` viene sempre eseguito se in precedenza è presente un blocco `try`. Questo assicura che un blocco `finally` viene eseguito anche se si verifica un eccezzione inaspettata. `finally` è utile non solo per la gestione delle eccezioni, infatti consente al programmatore di ripulire il codice (clean up code) che è stato accidentalmente ignorato da un `return`, `continue` o `break`. Mettere codice in un blocco `finally` è sempre una buona pratica, anche quando non sono previste eccezioni.
+
+> **Importante:** il blocco `finally` è uno strumento chiave per prevenire perdite di risorse. Quando si chiude un file o si ripristinano risorse in un altro modo, bisogna inserire il codice in un blocco `finally` per assicurarsi che la risorsa venga sempre ripristinata.
 
 
+### The try-with-resources Statement
+
+Lo statement *try with resources* è un `try` statement che dichiara una o più risorse. Una *risorsa* è un oggetto che deve essere chiuso dopo che il programma "ha finito di usarla". Lo statement try-with-resourcers assicura che ogni risorsa è chiusa alla fine dello statement. Qualsiasi oggetto che implementa `java.lang.AutoCloseable`, che include tutti gli oggetti che implementano `java.io.Closeable`, possono essere usati come risorsa. Il seguente esempio legge la prima riga di un file. Usa un'istnaza di `BufferedReader` per leggere dati da un file. `BufferedReader` è una risorsa che *deve* essere chiuso dopo che il programma ha finito di leggere:
+
+```java
+/*  try (
+      BufferedReader br = new BufferedReader(new FileReader(path))) {
+      return br.readLine();
+  }
+}*/
+```
+
+In questo esempio la risorsa dichiarata nello statement try-with-resources è un `BufferedReader`. La dichiarazione dello statement appare tra parentesi tonde subito dopo la keyword `try`. La classe `BufferedReader` implementa l'interfaccia `java.lang.AutoCloseable`. Siccome l'istanza di `BufferedReader` è dichiarata all'interno di un try-with-resource statement, la risorsa verrà chiusa indipendentemente dal fatto che lo statement `try` completi normalmente o all'improvviso (lancio di un'eccezione).
 
 
+### Specifyng the Exceptions Thrown by a Method
 
+Qualche volta è meglio lasciare che un metodo "più in alto" nel call stack gestisca l'eccezione piuttosto che venga gestita ill'interno del metodo in cui è stata sollevata quell'eccezione.
+
+Per specificare che un metodo può (ri)lanciare eccezioni, si aggiunge una clausola `throws` nella dichiarazione del metodo. La clausola `throws` comprende la keyword `throws` seguita da una lista di tutte le possibili eccezione lanciate dal metodo (separate da virgola).La clausola va inserita dopo il nome del metodo e la lista degli argomenti e prima dell'apertura della parentesi graffa che definisce lo scope del metodo.
+
+
+```java
+public void writeList() throws IOException, IndexOutOfBoundsExceptions {
+    // method body
+}
+```
+
+> **Nota:** Ricordiamo che IndexOutOfBoundsExceptions è un'eccezione uncheked; includerla nella clausola throws non è obbligatorio.
+
+### How to Throw Exceptions
+
+Prima di catturare un'eccezione, del codice da qualche parte deve lanciarne una. Indipendentemente da cosa lancia un'eccezione, è sempre lanciata dallo statement `thrown`.
+La piattaforma Java offre numerose classi di eccezioni: tutte queste classi derivano dalla classe `Throwable`, e permettono ai programmi di differenziare tra i tipi di eccezioni che possono verificarsi durante l'esecuzione di un programma. È possibile inoltre creare delle proprie classi di eccezioni per rappresentare problemi che si presentano nella classe che si sta scrivendo. Infatti, se sei uno sviluppatore di package, dovresti creare il tuo set di eccezioni per permettare agli utenti di differenziare un errore che può accadere nel tuo package da un errori che occorrono nella piattaforma Java o altrove.
+
+#### The `throw` Statement
+
+Tutti i metodi usano lo statement `throw` per lanciare un eccezione. Lo statement `throw` richiede un singolo argomento: un oggetto `throwable`. Gli oggetti throwable sono istanze di qualsiasi sottoclasse di Throwable.
+
+```java
+throw someThrowableObject;
+```
+
+#### Throwable Class and Its Sublcasses
+
+Gli oggetti che ereditano dalla classe Throwable includono sia discendenti diretti (oggetti che ereditano direttamente dalla classe Throwable) che discendenti indiretti (oggetti che ereditano da figli o nipoti della classe Throwable). La figura seguente illustra la gerarchia di classi della classe Throwable e le sue sottoclassi più significative. Come si può vedere, Throwable ha due discendenti diretti: Error ed Exception.
+
+
+<p align="center">
+  <img src="/img/exc.gif" width="350"/>
+</p>
+</br>
+
+
+#### Exception Classes
+
+La maggior parte dei programmi lancia e cattura oggetti che derivano dalla classe Exception. Un'Exception indica che si è verificato un problema, ma non si tratta di problema grave di sistema. La maggior parte dei programmi scritti generano e rilevano eccezioni anziché errori.
+
+### Creating Exceptions Classes
+ Si dovrebbero scrivere le proprie classi di eccezioni se si risonde positivamente a qualsiasi delle seguenti domande:
+
+ * Ha bisogno di un tipo di eccezione che non è rappresentato da quelli presenti nella piattaforma Java?
+ * Aiuterebbe gli utenti poter differenziare le tue eccezioni da qualle generate da classi scritte da altri?
+ * Se usi le eccezioni scritte da qualcun altro, gli utenti avranno accesso a tali eccezioni?
 
 
 ## Basic I/O
+
+### I/O Streams
+
+Uno I/O stream rappresenta un sorgente di input o una destinazione di output. Uno stream può rappresentare differenti tipi di sorgenti e destinazioni, inclusi file su disco, dispositivi, altri programmi ed array di memoria.
+Gli stream supportano differenti tipi di dati, come semplici byte, tipi primitivi, caratteri localizzati e oggetti. Alcuni stram semplicemente trasmettono semplicemente dati. Altri manipolano e trasformano i dati in modi utili. Indipendentemente dal modo funzionamento interno, tutti gli stream lo stesso semplice modello ai programmi che li usano: uno stream è una sequenza di dati.
+Un programma utilizza un input stream per leggere i dati da una sorgente, un elemento per volta.
+
+
+
+<p align="center">
+  <img src="/img/io-ins.gif" width="350"/>
+</p>
+</br>
+
+
+Un programma usa un output stream per scrivere dati verso una destinazione, un elemento alla volta.
+
+
+<p align="center">
+  <img src="/img/io-outs.gif" width="350"/>
+</p>
+</br>
+
+
+
+La `java.io` è divisa in due gerarchie di classi importanti a seconda del dato su cui operano: stream su byte o su carattere.
+
+
+<p align="center">
+  <img src="/img/javaIO.png" width="350"/>
+</p>
+</br>
+
+
+
+### image gerarchio I/O
+
+
+
+### Byte Streams
+
+I programmi usano byte streams per eseguire input e output di byte. Tuttel le classi byte stream discendono da `InputStream` e `OutputStream`. Ci sono molte classi di byte stream. In questo esempio ci focalizziamo su `FileInputStream` e `FileOutpuStream`.
+
+```java
+public class CopyBytes {
+    public static void main(String[] args) throws IOException {
+
+        FileInputStream in = null;
+        FileOutputStream out = null;
+
+        try {
+            in = new FileInputStream("xanadu.txt");
+            out = new FileOutputStream("outagain.txt");
+            int c;
+
+            while ((c = in.read()) != -1) {
+                out.write(c);
+            }
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
+        }
+    }
+}
+```
+
+`CopyBytes` spende la maggior parte del tempo in un semplice ciclo che legge lo stream di input e scrive lo stream di output, un byte alla volta, come mostrato in figura:
+
+
+<p align="center">
+  <img src="/img/byteStream.gif" width="350"/>
+</p>
+</br>
+
+
+La chiusura di uno stream quando non è più necessario è molto importante tanto che si usa un blocco `finally` per garantire che gli stream vengano chiusi come nell'esempio. Questa pratica aiuta ad evitare gravi perdite di risorse.
+
+#### When Not to Use Byte Streams
+
+Byte strams dovrebbero essere usati solamente per l'I/O più primitivo.
+
+
+### Character Streams
+
+La piattaforma Java memorizza i valori dei caratteri utlizzando le convenzioni *Unicode*. L'I/O dello stream di caratteri traduce automaticamente questo formato *in* e dal *set* di caratteri locale. Nelle versioni occidentali, il set di caratteri locali è in genere un 8-bit superset di ASCII.
+
+Per la maggior parte delle applicazioni, l'I/O con stream di caratteri non è più complesso di quello con stream di byte. Input e output eseguiti con le classi di stream traducono automaticamente da e verso il set di caratteri locali. Se l'internazionalizzazione non è una priorità, si possono semplicemente usare le class di stream di caratteri senza porre molta attenzione ai problemi relativi ai set di caratteri. Successivamente, se l'internazionlizzazione diventa una priorità, il programma può essere adattato senza una estesa ricodifica.
+
+
+#### USing Character Streams
+
+Tutte le classi di stream di caratteri discendono da `Reader` e `Writer`. Come per gli stream di byte, ci sono classi di stream di caratteri specializzate in I/O di file: `FileReader` e `FileWriter`. L'esempio mostra l'utilizzo di queste classi:
+
+```java
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class CopyCharacters {
+    public static void main(String[] args) throws IOException {
+
+        FileReader inputStream = null;
+        FileWriter outputStream = null;
+
+        try {
+            inputStream = new FileReader("xanadu.txt");
+            outputStream = new FileWriter("characteroutput.txt");
+
+            int c;
+            while ((c = inputStream.read()) != -1) {
+                outputStream.write(c);
+            }
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        }
+    }
+}
+```
+
+### Buffered Streams
+
+Fino ad ora si è trattato di *unbuffered* I/O. Questo significa che ogni richiesta di lettura o scrittura viene gestita direttamente dal sistema operativo. Questa situazione rende un programma meno efficiente, dal momento che ciascuna di tali richieste spesso attiva l'accesso al disco, l'attività di rete o qualche altra operazione relativamente costosa.
+
+Per ridurre questo tipo di sovraccarico, la piattafomra Java implementa i *buffered I/O streams*. I buffered input streams leggono dati da un area di memoria conosciuta come **buffer**. Un programma può convertire uno stream non bufferizzato in un buffered stream usando l'idioma di wrapping già visto in precedenza, dove l'oggetto stream non bufferizzato viene passato al costruttore di una classe buffered stream:
+
+```java
+inputStream = new BuffereReader(new FileReader("file.txt"));
+outputStream = new BufferedWriter(new FileWriter("out.txt"));
+```
+
+Ci sono 4 classi di streram bufferizzati usate per wrappare stream non bufferizzati:
+
+* `BufferedInputStream` e `BufferedOutputStream` creano streams di byte bufferizzati
+* `BufferedReader e BufferedWriter` creano streams buffereizzati di caratteri
+
+#### Flushing Buffered Streams
+
+Spesso ha senso fare in modo che tutto il contenuto del buffer vengo scritto senza aspettare che si riempia. Questo è conosciuto come *flushing the buffer*. Alcune classi di output bufferizzate supportano l'autoflush, specificato da un argomento opzionale del costruttore. Quando l'autoflush è abilitato, alcuni eventi chiave causano ol flush del buffer. Per esempio, un oggetto autoflush `PrinterWriter` flusha il buffer ad ogni invocazione di `println` o `format`.
+Per flushare uno stream manualmente bisogna invocare il suo metodo `flush`. Il metodo `flush` è valido per qualsiasi stream di output, ma non ha effetto se lo stream non è bufferizzato.
+
 
 ## Concurrency
 
