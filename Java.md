@@ -2232,4 +2232,300 @@ Le classi di stream di oggetti sono `ObjectInputStream` e `ObjectOutputStream`. 
 
 ## Concurrency
 
-## Networking
+### Process and Threads
+
+Nella programmazione concorrente ci sono due unità di base esecuzione: *processi* e *threads*. Nel linguaggio di programmazione Java, la programmazione concorrente riguarda principalmente i thread.
+
+Un computer normalmente ha molti processi e thread attivi. Questo vale anche per sistemi con un singolo core di esecuzione e quindi hanno solo un thread che sta eseguendo in un dato momento. *Il tempo di elaborazione* per un singolo core è condiviso tra preocessi e thread attraverso una funzionalità del OS chiamata *time slicing*.
+
+#### Processes
+
+Un processo ha un proprio ambiente di esecuzione. In generale un processo ha un set completo e privato di risorse di base per l'esecuzione; in particolare, ogni processo ha il proprio spazio di memoria.
+
+I processi sono spesso visti come sinonimi di programmi o applicazioni. Tuttavia, ciò che l'utente vede come singola applicazione potrebbe in effetti essere un insieme di processi cooperanti. Per facilitare la comunicazione tra i processi, la maggior parte dei sistemi operativi supporta le risorse *Inter Process Communication (IPC)*, come pipes e sockets. IPC è viene utilizzato non solo per la comunicazione tra i processi sullo stesso sistema ma anche per processi su sistemi differenti.
+
+La maggior parte delle implementazioni della Java virtual machine viene eseguita come un singolo processo. Un'applicazione Java può creare processi aggiuntivi usando l'oggetto `ProcessBuilder`.
+
+
+#### Threads
+
+I thread sono talvolta chiamati *lightweight processes*. Sia processi che threads forniscono un ambiente di esecuzione, ma la creazione di un nuovo thread richiede meno risorse rispetto alla creazione di un nuovo processo.
+
+I threads esistono all'interno di un processo (ogni processo ne ha almeno uno), I threads condividono le risorse del processo, inclusi memoria e file aperti. Questo rende la comunicazione efficiente, ma potenzialmente problematica.
+
+L'esecuzione multithread è una caratteristica essenziale della piattaforma Java. Ogni applicazione ha almeno un thread (o diversi, se si contano thread di sistema che fanno cose come la gestione della memoria), il *main* thread. QUestro thread ha la capacità di creare thread aggiuntivi.
+
+#### Thread Objects
+
+Ogni thread è associato ad un istanza della classe `Thread`. Ci sono due strategi di base per usare oggetti di tipo `Thread` per creare un'applicazione concorrente:
+
+* Per controllare direttamente la creazione e la gestione dei thread si istanzia semplicemente la classe `Thread` ogni qualvolta l'applicazione ha bisogno di cominciare un task asincrono.
+* Per astrarre la gestione dei thread dal resto dell'applicazione, si passano i task dell'applicazioen ad  un **executor**.
+
+
+#### Defining and Starting a Thread
+
+Un'applicazione che crea un'istanza di `Thread` deve fornire il codice che verrà eseguito in tale thread. Ci sono due modi per farlo:
+
+* Fornire un oggetto `Runnable`. L'interfaccia `Runnable` definisce un singlol metodo, `run`, pensato per contenere il codice eseguito in un thread. L'oggetto `Runnable` è passato al costruttore di `Thread`, come nell'esempio:
+
+```java
+public class HelloRunnable implements Runnable {
+
+    public void run() {
+        System.out.println("Hello from a thread!");
+    }
+
+    public static void main(String args[]) {
+        (new Thread(new HelloRunnable())).start();
+    }
+
+}
+```
+
+* Estendere la classe `Thread`. La classe stessa `Thread` implementa `Runnable`, sebbene il suo metodo `run` non faccia nulla. Un'applicazione può estendere la classe `Thread`, fornendo la sua implementazione del metodo `run`, come nell'esmepio:
+
+
+```java
+public class HelloThread extends Thread {
+
+    public void run() {
+        System.out.println("Hello from a thread!");
+    }
+
+    public static void main(String args[]) {
+        (new HelloThread()).start();
+    }
+
+}
+```
+
+**Quale modo usare?**: il primo approccio, che separa l'attività `Runnable` dall'oggetto `Thread` che esegue l'attività. Questo approccio non solo è più flessibile, ma è applicabile alle API di gestione dei thread di alto livello trattate in seguito.
+
+
+#### Pausing Execution with Sleep
+
+`Thread.sleep` fa in modo che il thread corrente sospenda l'esecuzione per un periodo specificato. QUesto è un mezzo efficiente per rendere il tempo del porcessore disponibile ad altri thread di un'applicazione o ad altre applicazioni che potrebbero essere in esecuzione in un sistema informatico. Il metodo `sleep` può essere utilizzato anche per il pacing, come nell'esempio che segue, e aspettare  un altro thread. Sono fornite due versioni di `sleep`: una specifica il tempo in millisecondi, l'altra in nanosecondi. Tuttavia, questi tempi di `sleep` non è garantito che siano precisi, in quanto sono limitati dalle strutture fornite dal sistema operativo sottostante. Inoltre il periodo di `sleep` può terminare a causa di un interrupt. In ogni caso, non è possibile assumereche l'invocazione del metodo `sleep` sospenderà il thread per il tempo specificato.
+
+
+```java
+public class SleepMessages {
+    public static void main(String args[]) throws InterruptedException {
+        String importantInfo[] = {
+            "Mares eat oats",
+            "Does eat oats",
+            "Little lambs eat ivy",
+            "A kid will eat ivy too"
+        };
+
+        for (int i = 0; i < importantInfo.length; i++) {
+            //Pause for 4 seconds
+            Thread.sleep(4000);
+            //Print a message
+            System.out.println(importantInfo[i]);
+        }
+    }
+}
+```
+
+#### Interrupt
+
+Un *interrupt* è un indicazione a un thread che dovrebbe interrompere ciò che sta facendo e fare qualcos'altro. Spetta al programmatore decidere esattamente come un thread debba rispondere ad un interrupt, ma è comune per un thread terminare a causa di un interrupt.
+
+Un thread invia un interrupt invocando un `interrupt` sull'oggetto `Thread` per il thread da interrompere. Per garantire che il meccanismo di interrupt funzioni correttamentem il thread interrotto deve supportare la propria interruzione.
+
+
+##### Supporting Interruption
+
+Come un thread supporta un interruzzione? Dipende da cosa sta facendo. Se il thread sta frequentemente invocando metodi che lanciano `InterruptedException`, allora ritorna semplicemente dal metodo `run` dopo aver catturato quell'eccezione.
+
+
+```java
+for (int i = 0; i < importantInfo.length; i++) {
+    // Pause for 4 seconds
+    try {
+        Thread.sleep(4000);
+    } catch (InterruptedException e) {
+        // We've been interrupted: no more messages.
+        return;
+    }
+    // Print a message
+    System.out.println(importantInfo[i]);
+}
+```
+
+Molti metodi che lanciano `InterruptedException`, come sleep, sono progettati per annulare le operazioni correnti e ritornare immediatamente quando viene ricevuto un interrupt.
+
+Cosa succede se un thread va avanti molto tempo senza richiamare un metodo che genera un `InterruptedException`? In questo caso deve periodicamente richiamare `Thread.interrupted`, che restituisce `true` se è stato ricevuto un interrupt.
+
+```java
+for (int i = 0; i < inputs.length; i++) {
+    heavyCrunch(inputs[i]);
+    if (Thread.interrupted()) {
+        // We've been interrupted: no more crunching.
+        return;
+    }
+}
+```
+
+In questo esempio, il codice verifica semplicemente l'interrupt ed esce dal thread se ne è stato ricevuto uno. Nelle applicazioni più complesse, potrebbe essere più sensato lanciare un'interrupt.
+
+```java
+if (Thread.interrupted()) {
+    throw new InterruptedException();
+}
+```
+
+##### The Interrupt Status Flag
+
+Il meccanismo di interruzione è implementato utilizzando un flag interno noto come *stato dell'interrupt*. Invocando `Thread.interrupt` imposta questo flag. Quando un thread verifica la presenza di un interrupt invocando il metodo statico `Thread.interrupted`, lo stato dell'interrupt viene cancellato. Il metodo non statico `isInterrupted`, usato da un thread per interrogare lo stato di interrupt di un altro, non modifica il flag di stato dell'interrupt. Per convenzione, qualsiasi metodo che esce a causa del lancio di un `InterruptedException` cancella lo stato di interrupt quando lo fo. Tuttavia è sempre possibile che lo stato di un interrupt sia immediatamente reimpostato da un altro thread che richiama l'interrupt.
+
+
+
+#### Joins
+
+Il metodo `join` permette ad un thread di aspettare il completamento di un altro thread. Se `t` è un oggetto di tipo `Thread`, il cui thread è attualmente in esecuzione,
+
+```java
+t.join();
+```
+
+fa in modo che il thread corrente sospenda l'esecuzione fino a quando il thread `t` termina. Overlaods di join permettono ai programmatori di specificare un periodo di attesa. Tuttavia, come per sleep, join dipende dal OS per quanto riguard il tempo, quindi non si dovrebbe presumere che il join attenderà esattamente quanto specificato.
+
+Come per `sleep`, `join` risponde ad un interrutp uscendo con una `InterruptedException`.
+
+
+
+### Synchronization
+
+I thread comunicano principalmente condividendo l'accesso ai campi e ai rifermenti agli oggetti a cui si riferiscono. Questa form adi comunicazione è estremamente efficiente, ma rende possibili due tipi di errori: *interfernza tra thread* ed *errori di consistenza della memoria*. Lo strumento necessario per prevenire questi errori è la *synchronization*.
+
+Tuttavia, la sincronizzazione può introdurre conflitti tra thread, che si verificano quando due o piu thread tentano di accedere contemporaneamente alla stessa risorsa e fanno sì che la Java runtime esegua uno o più thread più lentamente, o addirittua sospenda la loro esecuzione. *Starvatione* e *livelock*
+sono forme di contesa tra thread.
+
+#### Thread Interference
+
+Si con consideri una semplice classe `Counter`
+
+```java
+class Counter {
+    private int c = 0;
+
+    public void increment() {
+        c++;
+    }
+
+    public void decrement() {
+        c--;
+    }
+
+    public int value() {
+        return c;
+    }
+
+}
+```
+
+`Counter` è progettata in modo tale che ogni invocazione di `increment` aggiunge un 1 a `c`, ed ogni invocazione di `decrement`, sottrae un 1 a `c`. Tuttavia, se un oggetto `Counter` e riferito da più threads, l'interferenza tra threads potrebbe impedire che ciò accada come previsto.
+
+L'interferenza si verifica quando due operazioni, eseguite su threads differenti, ma che agiscono sugli stessi dati, si alternano. Ciò significa che le due operazioni consistono di molti passaggi, e le sequenze di passaggi si sovrappongono.
+
+Potrebbe non sembrare possibile per operazioni su istanze di Counter avere delle alternanze, dal momento che entrambe le operazioni su c sono semplici singole dichiarazioni. Tuttavia, anche semplici statements posso tradursi in più operazioni svolte dalla virtual machine. Infatti, la singola espressione `c++` può essere scomposta in tre passaggi:
+
+* Recupera il valore corrente di c
+* Incrementa il valore recuperato di 1
+* Memorizza il valore incrementato
+
+Supponiamo che il thread A invochi l'incremento all'incirca nello stesso momento in cui il thread B richiama il decremento. Se il valore iniziale di c è 0, le loro azioni potrebbero alternarsi nel seguente modo:
+
+* **Thread A**: recupera c
+* **Thread B**: recupera c
+* **Thread A**: incrementa il valore recuperato, il risultato è 1
+* **Thread B**: decrementa il valore recuperato, il risultato è -1
+* **Thread A**: salva il risultato in c, ed ora c = 1
+* **Thread B**: salva il risultato in c, ed ora c = -1
+
+Il risultato del thread A è perso, sovrascritto dal thread B. Questa particolare alternanza è solo una delle possibilità. In circostanze diverse potrebbe essere il risultato del thread B che si perde, o non ci può essere alcun errore. Poiché sono imprevedibili, i bug di interferenza dei thread possono essere difficili da rilevare e risolvere.
+
+
+#### Memory Consistency Errors
+Errori di inconsistenza della memoria accadono quando thread distinti hanno viste differenti di quelli che dovrebbero essere gli stessi dati. Le cause di questi errori sono complesse. La chiave per evitare errori di coerenza di memoria è capire la relazione *happens-before*.
+Questa relazione è semplicemente una garanzia che la memoria scritta da uno specifico statement è visibile da un altro specifico statement. Esempio:
+
+```java
+int counter = 0;
+```
+
+Il campo counter è condiviso tra due threads, A e B. Suppoiniamo di incrementare A:
+
+```java
+counter++;
+```
+
+Poi, subito dopo, il thread B stampa `counter`:
+
+```java
+System.put.println(counter);
+```
+
+Se i due statements sono eseguiti nello stesso thread, è corretto pensare che il valore stampato sia 1. Ma se i due statements sono eseguiti su due thread differenti, il valore stampato potrebbe essere `0`, in quanto non c'alcuna garanzia che il cambiamento provocato dal thread A sia visibile al thread B, a meno che il porgrammatore abbia stabilito una relazione *happens-before* tra questi due statements.
+
+Ci sono molti modi per creare relazioni happens-before. Uno di questi è la sincronizzazione.
+
+
+#### Synchronized Methods
+
+Java fornisce due modi base di sincronizzazione: i metodi sincronizzati e gli statements sincronizzati.
+
+Per rendere un metodo sincronizzato, semplicemente si aggiunge la keyword `synchronized` alla sua dichiarazione, prima del tipo di ritorno:
+
+```java
+public class SynchronizedCounter {
+    private int c = 0;
+
+    public synchronized void increment() {
+        c++;
+    }
+
+    public synchronized void decrement() {
+        c--;
+    }
+
+    public synchronized int value() {
+        return c;
+    }
+}
+```
+Se count è un istanza di `SynchronizedCounter`, allora rendendere questi metodi sincronizzati provaca 2 cose:
+
+* La prima, non sono possibile scambi per due invocazioni di metodi sincronizzati sullo stesso oggetto. Quando un thrad sta eseguendo un metodo sincronizzato per un oggetto, tutti gli altri thread che invocano metodi sincronizzati sullo stesso oggetto sospendono la loro esecuzione fino a quando il primo thread non ha finito con l'oggetto.
+* Secondo, quando esiste un metodo sincronizzato, automaticamente stabilisce una relazione happens-before con qualsiasi successiva invocazione di un metodo sincronizzato sullo stesso oggetto. QUesto garantisce che i cambiamenti sullo stato di un oggetto siano visibili a tutti i threads.
+
+Si noti che i costruttori non possono essere sincronizzati. Sincronizzare i costruttori non ha senso in quanto solo il thread che crea un oggetto dovrebbe avere accesso al costruttore mentre viene costruito.
+
+I metodi sincronizzati abilitano una strategia semplice per prevenire l'interferenza dei thread e gli errori di coerenza della memoria: se un oggetto è visibile a più thread, tutte le letture o le scritture sulle variabili di quell'oggetto vengono eseguite tramite metodi sincronizzati. (Un'eccezione importante: i campi `final`, che non possono essere modificati dopo che l'oggetto è stato costruito, possono essere tranquillamente letti attraverso metodi non sincronizzati, una volta costruito l'oggetto) Questa strategia è efficace, ma può presentare problemi di liveness.
+
+
+#### Intrinsic Lock and Synchronization
+
+La sincronizzazione è costruita attorno ad un'entità interna nota come `intrinsic lock` o `monitor lock`. (Le API si riferiscono a questa entità come "monitor"). Gli Intrinsic lock giocano un ruolo in entrambi gli aspetti della sincronizzazione: rafforzano l'accesso esclusivo allo stato di un oggetto e stabiliscono relazioni happens-before che sono essenziali per la visibilità.
+
+Ogni oggetto ha un intrinsick lock associato ad esso. Per convenzione, un thread che necessita di un accesso esclusivo e consistente ad un campo di un oggetto deve acquisire l'intrinsic lock dell'oggetto prima di potervi accedere, e poi rilasciare il lock quando ha finito. Si dice che un thread possiede il lock dal momento in cui ha acquisito il lock fino a quando lo ha rilasciato. Finchè un thread possiede il lock, nessun altro thread può acqusire lo stesso lock. L'altro thread verrà bloccato se dovesse tentare di acquisire il lock.
+
+Quando un thread rilascia un lock, viene stabilita una relazione happens-before tra quell'azione e ogni successiva acquisizione dello stesso lock.
+
+
+#### Locks In Sinchronized Methods
+
+Qaundo un thread invoca un metodo sincronizzato, automaticamente acquisisce il lock per l'oggetto del metodo e lo rilascia quando il metodo ritorna. Il lock viene rilasciato anche se il return è causato da un'eccezione non rilevata.
+
+Ci si potrebbe chiedere cosa succede quando viene invocato un metodo sincronizzato statico, poiché un metodo statico è associato a una classe e non ad un oggetto. In questo caso, il thread acquisisce il lock per l'oggetto `Class` associato alla classe. Pertanto l'accesso ai campi statici della classe è controllato da un lock che è diverso dal lock per qualsiasi istanza della classe.
+
+
+#### Sinchronized Statements
+
+Un altro modo per creare codice sincronizzato è attraverso *synchronized statements*. Diversamente dai metodi sincronizzati, gli statements sincronizzarti devono specificare l'oggetto di cui si vuole acquisire il lock.
+
+
+
+#### Atomic Access
