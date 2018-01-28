@@ -2084,7 +2084,7 @@ public class CopyCharacters {
 
 Fino ad ora si è trattato di *unbuffered* I/O. Questo significa che ogni richiesta di lettura o scrittura viene gestita direttamente dal sistema operativo. Questa situazione rende un programma meno efficiente, dal momento che ciascuna di tali richieste spesso attiva l'accesso al disco, l'attività di rete o qualche altra operazione relativamente costosa.
 
-Per ridurre questo tipo di sovraccarico, la piattafomra Java implementa i *buffered I/O streams*. I buffered input streams leggono dati da un area di memoria conosciuta come **buffer**. Un programma può convertire uno stream non bufferizzato in un buffered stream usando l'idioma di wrapping già visto in precedenza, dove l'oggetto stream non bufferizzato viene passato al costruttore di una classe buffered stream:
+Per ridurre questo tipo di sovraccarico, la piattafomra Java implementa i *buffered I/O streams*. I buffered input streams leggono dati da un area di memoria conosciuta come **buffer**. Un programma può convertire uno stream non bufferizzato in un buffered stream usando la pratica di wrapping già visto in precedenza, dove l'oggetto stream non bufferizzato viene passato al costruttore di una classe buffered stream:
 
 ```java
 inputStream = new BuffereReader(new FileReader("file.txt"));
@@ -2468,7 +2468,7 @@ Poi, subito dopo, il thread B stampa `counter`:
 System.put.println(counter);
 ```
 
-Se i due statements sono eseguiti nello stesso thread, è corretto pensare che il valore stampato sia 1. Ma se i due statements sono eseguiti su due thread differenti, il valore stampato potrebbe essere `0`, in quanto non c'alcuna garanzia che il cambiamento provocato dal thread A sia visibile al thread B, a meno che il porgrammatore abbia stabilito una relazione *happens-before* tra questi due statements.
+Se i due statements sono eseguiti nello stesso thread, è corretto pensare che il valore stampato sia 1. Ma se i due statements sono eseguiti su due thread differenti, il valore stampato potrebbe non essere `0`, in quanto non c'alcuna garanzia che il cambiamento provocato dal thread A sia visibile al thread B, a meno che il porgrammatore abbia stabilito una relazione *happens-before* tra questi due statements.
 
 Ci sono molti modi per creare relazioni happens-before. Uno di questi è la sincronizzazione.
 
@@ -2529,3 +2529,604 @@ Un altro modo per creare codice sincronizzato è attraverso *synchronized statem
 
 
 #### Atomic Access
+
+Nella programmazione, un'azione atomica è quella che effettivamente accade tutto in una volta. Un'azione atomica non può fermarsi nel mezzo: o accade completamente, o non accade affatto. Non sono visibili effetti collaterali di un'azione atomica finché l'azione non è completa.
+
+Abbiamo già visto che un'espressione di incremento, come `c++`, non descrive un'azione atomica. Anche espressioni molto semplici possono definire azioni complesse che possono decomporsi in altre azioni. Tuttavia, ci sono azioni che si possono definire come atomiche:
+
+* Lettura e scrittura sono operazioni atomiche per variabili riferimento e per la maggior parte delle variabili primitive (tutti i tipi tranne per long e double).
+* Lettura e scrittura sono operazioni atomiche per tutte le variabili dichiarate `volatile` (comprese le variabili long e double).
+
+Le azioni atomiche non possono essere intervallate, quindi possono essere utilizzate senza paura di interferenza fra thread. Tuttavia, ciò non elimina la necessità di sincronizzare le azioni atomiche, poiché errori di coerenza della memoria sono ancora possibili. L'uso di variabili volatili riduce il rischio di errori di coerenza della memoria, poiché ogni scrittura su una variabile volatile stabilisce una relazione happens-before con letture successive della stessa variabile. Ciò significa che le modifiche a una variabile volatile sono sempre visibili ad altri thread. Inoltre, significa anche che quando un thread legge una variabile volatile, non vede solo l'ultima modifica, ma anche gli effetti collaterali del codice che hanno portato alla modifica.
+
+Accedere usando una semplice variabile atomica è più efficiente che accedere a queste variabili tramite codice sincronizzato, ma richiede una maggiore attenzione da parte del programmatore per evitare errori di coerenza della memoria. Se lo sforzo extra è utile dipende dalle dimensioni e dalla complessità dell'applicazione.
+
+Alcune delle classi nel pacchetto java.util.concurrent forniscono metodi atomici che non si basano sulla sincronizzazione.
+
+### Liveness
+
+La capacità di un'applicazione concorrente di eseguire in modo tempestivo è nota come liveness. Questa sezione descrive i problemi più comuni di *liveness*, *deadlock*, e prosegue descrivendo brevemente altri due problemi di liveness, *starvation* e *livelock*.
+
+
+#### DeadLock
+
+Un Deadlock descrive una situazione in cui due o più thread sono bloccati per sempre, in attesa l'uno dell'altro. Ecco un esempio.
+
+Alphonse e Gaston sono amici e grandi credenti nella cortesia. Una rigida regola di cortesia è che quando ti inchini ad un amico, devi rimanere inchinato finché il tuo amico non ha la possibilità di restituire l'inchino. Sfortunatamente, questa regola non tiene conto della possibilità che due amici si pieghino l'un l'altro allo stesso tempo. Questa applicazione di esempio, Deadlock, modella questa possibilità:
+
+
+```java
+public class Deadlock {
+    static class Friend {
+        private final String name;
+        public Friend(String name) {
+            this.name = name;
+        }
+        public String getName() {
+            return this.name;
+        }
+        public synchronized void bow(Friend bower) {
+            System.out.format("%s: %s"
+                + "  has bowed to me!%n",
+                this.name, bower.getName());
+            bower.bowBack(this);
+        }
+        public synchronized void bowBack(Friend bower) {
+            System.out.format("%s: %s"
+                + " has bowed back to me!%n",
+                this.name, bower.getName());
+        }
+    }
+
+    public static void main(String[] args) {
+        final Friend alphonse =
+            new Friend("Alphonse");
+        final Friend gaston =
+            new Friend("Gaston");
+        new Thread(new Runnable() {
+            public void run() { alphonse.bow(gaston); }
+        }).start();
+        new Thread(new Runnable() {
+            public void run() { gaston.bow(alphonse); }
+        }).start();
+    }
+}
+```
+
+Quando viene eseguito` Deadlock`, è estremamente probabile che entrambi i thread si blocchino quando tentano di richiamare `bowBack`. Nessun blocco finirà mai, perché ogni thread sta aspettando che l'altro esca da `bow`.
+
+#### Starvation e LiveLock
+
+Starvation e livelock sono problemi molto meno comuni di un deadlock, ma sono comunque problemi che ogni progettista di software concorrente può incontrare.
+
+##### Starvation
+
+Starvation descrive una situazione in cui un thread non è in grado di ottenere un accesso regolare alle risorse condivise e non è in grado di fare progressi. Questo accade quando le risorse condivise sono rese non disponibili per lunghi periodi da thread "greedy"(avidi). Ad esempio, supponiamo che un oggetto fornisca un metodo sincronizzato che spesso richiede molto tempo per essere restituito. Se un thread richiama frequentemente questo metodo, spesso vengono bloccati anche altri thread che richiedono un accesso sincronizzato frequente allo stesso oggetto.
+
+##### LiveLock
+
+Un thread spesso agisce in risposta all'azione di un altro thread. Se l'azione del thread secondario è anche una risposta all'azione di un altro thread, potrebbe verificarsi un livelock. Come per la situazione di deadlock, i thread in fase di livelock non sono in grado di fare ulteriori progressi. Tuttavia, i thread non sono bloccati - sono semplicemente troppo occupati a rispondere l'un l'altro per riprendere il lavoro. Questo è paragonabile a due persone che tentano di passarsi l'un l'altro in un corridoio: Alphonse si sposta alla sua sinistra per lasciar passare Gaston, mentre Gaston si sposta alla sua destra per lasciare passare Alphonse. Vedendo che si stanno ancora bloccando a vicenda, Alphone si sposta alla sua destra, mentre Gaston si sposta alla sua sinistra. Stanno ancora bloccandosi a vicenda, quindi ...
+
+### Guarded Blocks
+
+I thread spesso devono coordinare le loro azioni. La pratica di coordinamento più comune è il guarded block. Tale blocco inizia verificando una condizione che deve essere vera prima che il blocco possa procedere. Ci sono una serie di passaggi da seguire per farlo correttamente.
+
+Supponiamo, ad esempio, che `guardedJoy` sia un metodo che non deve procedere finché una vairabile `joy` condivisa non è stata settata da un altro thread. Un tale metodo potrebbe, in teoria, semplicemente eseguire il ciclo fino a quando la condizione non è soddisfatta, ma tale ciclo è dispendioso, poiché viene eseguito continuamente durante l'attesa.
+
+```java
+public void guardedJoy() {
+    // Simple loop guard. Wastes
+    // processor time. Don't do this!
+    while(!joy) {}
+    System.out.println("Joy has been achieved!");
+}
+```
+
+Una guard più efficiente invoca `Object.wait` per sospendere il thread corrente. L'invocazione di `wait` non ritorna fino a quando un'altro thread ha emesso una notifica che indica che potrebbe essersi verificato qualche evento speciale, sebbene non necessariamente l'evento che questo thread sta aspettando:
+
+
+```java
+public synchronized void guardedJoy() {
+    // This guard only loops once for each special event, which may not
+    // be the event we're waiting for.
+    while(!joy) {
+        try {
+            wait();
+        } catch (InterruptedException e) {}
+    }
+    System.out.println("Joy and efficiency have been achieved!");
+}
+```
+
+> **Nota:** invoca sempre `wait` all'interno di un ciclo che verifica la condizione in attesa.
+
+Come molti metodi che sospendono l'esecuzione, `wait` può generare `InterruptedException`. In questo esempio, possiamo semplicemente ignorare questa eccezione: ci interessa solo il valore di `joy`.
+
+Perché questa versione di `guardedJoy` è sincronizzata? Supponiamo che `d` sia l'oggetto che stiamo usando per invocare `wait`. Quando un thread invoca `d.wait`, deve possedere il lock per `d`, altrimenti viene generato un errore. Invocare `wait` all'interno di un metodo sincronizzato è un modo semplice per acquisirne il lock.
+
+Quando viene richiamato `wait`, il thread rilascia il lock e sospende l'esecuzione. In futuro, un altro thread acquisirà lo stesso blocco e invocherà `Object.notifyAll`, informando tutti i thread in attesa su quel blocco che è successo qualcosa di importante:
+
+
+```java
+public synchronized notifyJoy() {
+    joy = true;
+    notifyAll();
+}
+```
+
+Qualche istante dopo che il secondo thread ha rilasciato il lock, il primo thread riacquisisce il lock e riprende ritornando all'invocazione di `wait`.
+
+> **Nota:** esiste un secondo metodo di notifica, `notify`, che risveglia un singolo thread.
+
+
+Utilizziamo dei guard block per creare un'applicazione `Producer-Consumer`. Questo tipo di applicazione condivide i dati tra due thread: il produttore, che crea i dati, e il consumatore, che li consuma. I due thread comunicano usando un oggetto condiviso. Il coordinamento è essenziale: il thread del consumatore non deve tentare di recuperare i dati prima che il thread del produttore li abbia consegnati e il thread del produttore non deve tentare di fornire nuovi dati se il consumatore non ha recuperato i vecchi dati.
+
+
+In questo esempio, i dati sono una serie di messaggi di testo, che sono condivisi attraverso un oggetto di tipo Drop:
+
+```java
+public class Drop {
+    // Message sent from producer
+    // to consumer.
+    private String message;
+    // True if consumer should wait
+    // for producer to send message,
+    // false if producer should wait for
+    // consumer to retrieve message.
+    private boolean empty = true;
+
+    public synchronized String take() {
+        // Wait until message is
+        // available.
+        while (empty) {
+            try {
+                wait();
+            } catch (InterruptedException e) {}
+        }
+        // Toggle status.
+        empty = true;
+        // Notify producer that
+        // status has changed.
+        notifyAll();
+        return message;
+    }
+
+    public synchronized void put(String message) {
+        // Wait until message has
+        // been retrieved.
+        while (!empty) {
+            try {
+                wait();
+            } catch (InterruptedException e) {}
+        }
+        // Toggle status.
+        empty = false;
+        // Store message.
+        this.message = message;
+        // Notify consumer that status
+        // has changed.
+        notifyAll();
+    }
+}
+```
+
+Il thread del produttore, definito in `Producer`, invia una serie di messaggi. La stringa `"DONE"` indica che tutti i messaggi sono stati inviati. Per simulare la natura imprevedibile delle applicazioni del mondo reale, il thread del produttore fa una pausa ad intervalli casuali tra i messaggi.
+
+```java
+import java.util.Random;
+
+public class Producer implements Runnable {
+    private Drop drop;
+
+    public Producer(Drop drop) {
+        this.drop = drop;
+    }
+
+    public void run() {
+        String importantInfo[] = {
+            "Mares eat oats",
+            "Does eat oats",
+            "Little lambs eat ivy",
+            "A kid will eat ivy too"
+        };
+        Random random = new Random();
+
+        for (int i = 0;
+             i < importantInfo.length;
+             i++) {
+            drop.put(importantInfo[i]);
+            try {
+                Thread.sleep(random.nextInt(5000));
+            } catch (InterruptedException e) {}
+        }
+        drop.put("DONE");
+    }
+}
+```
+
+Il thread del consumatore, definito in `Consumer`, recupera semplicemente i messaggi e li stampa, finché non recupera la stringa `"DONE"`. Inoltre questo thread va in pausa ad intervalli casuali.
+
+
+```java
+import java.util.Random;
+
+public class Consumer implements Runnable {
+    private Drop drop;
+
+    public Consumer(Drop drop) {
+        this.drop = drop;
+    }
+
+    public void run() {
+        Random random = new Random();
+        for (String message = drop.take();
+             ! message.equals("DONE");
+             message = drop.take()) {
+            System.out.format("MESSAGE RECEIVED: %s%n", message);
+            try {
+                Thread.sleep(random.nextInt(5000));
+            } catch (InterruptedException e) {}
+        }
+    }
+}
+```
+
+Alla fine, il main thread, definito in `ProducerConsumerExample`, che lancia i thread `Producer` e `Csonsumer`.
+
+```java
+public class ProducerConsumerExample {
+    public static void main(String[] args) {
+        Drop drop = new Drop();
+        (new Thread(new Producer(drop))).start();
+        (new Thread(new Consumer(drop))).start();
+    }
+}
+```
+
+### Immutable Objects
+
+Un oggetto è considerato immutabile se il suo stato non può cambiare dopo che è stato costruito. La massima dipendenza da oggetti immutabili è ampiamente accettata come una solida strategia per la creazione di codice semplice e affidabile.
+
+Gli oggetti immutabili sono particolarmente utili in applicazioni concorrenti. Dal momento che non possono cambiare lo stato, non possono essere corrotti dall'interferenza di thread o trovarsi in uno stato incoerente.
+
+I programmatori sono spesso riluttanti ad impiegare oggetti immutabili, perché si preoccupano del costo di creare un nuovo oggetto piuttosto di aggiornare un oggetto sul posto. L'impatto della creazione di oggetti è spesso sovrastimato e può essere compensato da alcune caratteristiche efficienti associate agli oggetti immutabili. Questi includono un ridotto overhead dovuto al garbage collection e l'eliminazione del codice necessario per proteggere gli oggetti mutabili dalla corruzione.
+
+Le seguenti sottosezioni prendono una classe le cui istanze sono mutabili e derivano da una classe con istanze immutabili. Così facendo, forniscono regole generali per questo tipo di conversione e dimostrano alcuni dei vantaggi degli oggetti immutabili.
+
+#### A Synchronized Class Example
+
+La classe SynchronizedRGB, definisce oggetti che rappresentano colori. Ogni oggetto rappresenta il colore attraverso tre interi corrispondenti ai colori primari e una stringa che identifica il nome del colore.
+
+```java
+public class SynchronizedRGB {
+
+    // Values must be between 0 and 255.
+    private int red;
+    private int green;
+    private int blue;
+    private String name;
+
+    private void check(int red,
+                       int green,
+                       int blue) {
+        if (red < 0 || red > 255
+            || green < 0 || green > 255
+            || blue < 0 || blue > 255) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    public SynchronizedRGB(int red,
+                           int green,
+                           int blue,
+                           String name) {
+        check(red, green, blue);
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
+        this.name = name;
+    }
+
+    public void set(int red,
+                    int green,
+                    int blue,
+                    String name) {
+        check(red, green, blue);
+        synchronized (this) {
+            this.red = red;
+            this.green = green;
+            this.blue = blue;
+            this.name = name;
+        }
+    }
+
+    public synchronized int getRGB() {
+        return ((red << 16) | (green << 8) | blue);
+    }
+
+    public synchronized String getName() {
+        return name;
+    }
+
+    public synchronized void invert() {
+        red = 255 - red;
+        green = 255 - green;
+        blue = 255 - blue;
+        name = "Inverse of " + name;
+    }
+}
+
+```
+
+SynchronizedRGB deve essere usata con attenzione per evitare di entrare in uno stato di inconsistenza. Supponiamo, ad esempio, che un thread esegua il seguente codice:
+
+
+```java
+SynchronizedRGB color =
+    new SynchronizedRGB(0, 0, 0, "Pitch Black");
+...
+int myColorInt = color.getRGB();      //Statement 1
+String myColorName = color.getName(); //Statement 2
+```
+
+Se un altro thread richiama color.set dopo l'istruzione 1 ma prima dell'istruzione 2, il valore di myColorInt non corrisponde al valore di myColorName. Per evitare questo risultato, le due istruzioni devono essere collegate tra loro:
+
+
+```java
+synchronized (color) {
+    int myColorInt = color.getRGB();
+    String myColorName = color.getName();
+}
+```
+
+
+Questo tipo di inconsistenza è possibile solo per oggetti mutabili: non sarà un problema per la versione immutabile di SynchronizedRGB.
+
+
+#### A Strategy for Definig Immutable Objects
+
+Le seguenti regole definiscono una strategia semplice per la creazione di oggetti immutabili. Non tutte le classi documentate come "immutabili" seguono queste regole.
+
+* Non fornire metodi `setter` - metodi che modificano campi o oggetti cui fanno riferimento i campi.
+* Rendi tutti i campi `final` e `private`
+* Non consentire alle sottoclassi di sovrascrivere i metodi. Il modo più semplice per farlo è dichiarare la classe come `final`. Un approccio più sofisticato è rendere privato il costruttore e costruire istanze in factory method.
+* Se i campi dell'istanza includono riferimenti a oggetti mutabili, non consentire la modifica di tali oggetti:
+* * Non fornire metodi che modificano gli oggetti mutabili.
+* * Non condividere riferimenti ad oggetti mutabili. Non memorizzare mai riferimenti ad oggetti esterni mutabili passati al costruttore; se necessario, creare copie e memorizzare i riferimenti alle copie. Allo stesso modo, crea copie dei tuoi oggetti interni mutabili quando necessario per evitare di restituire gli originali nei tuoi metodi.
+
+L'applicazione di questa strategia a `SynchronizedRGB provoca` i seguenti passaggi:
+
+* Ci sono due metodi `setter` in questa classe. Il primo, `set`, trasforma arbitrariamente l'oggetto. Il secondo, `invert`, può essere adattato facendo in modo che crei un nuovo oggetto invece di modificare quello esistente.
+* Tutti i campi sono già privati e sono ulteriormente qualificati come `final`.
+La classe stessa è dichiarata `final`.
+* Solo un campo si riferisce ad un oggetto e quell'oggetto è esso stesso immutabile. Pertanto, non è necessaria alcuna protezione contro la modifica dello stato degli oggetti mutabili "contenuti". (non ce ne sono)
+
+Dopo queste modifiche, abbiamo `ImmutableRGB`:
+
+```java
+
+final public class ImmutableRGB {
+
+    // Values must be between 0 and 255.
+    final private int red;
+    final private int green;
+    final private int blue;
+    final private String name;
+
+    private void check(int red,
+                       int green,
+                       int blue) {
+        if (red < 0 || red > 255
+            || green < 0 || green > 255
+            || blue < 0 || blue > 255) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    public ImmutableRGB(int red,
+                        int green,
+                        int blue,
+                        String name) {
+        check(red, green, blue);
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
+        this.name = name;
+    }
+
+
+    public int getRGB() {
+        return ((red << 16) | (green << 8) | blue);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public ImmutableRGB invert() {
+        return new ImmutableRGB(255 - red,
+                       255 - green,
+                       255 - blue,
+                       "Inverse of " + name);
+    }
+}
+```
+### High Level Concurrency Objects
+
+#### Lock Objects
+
+Il codice sincronizzato si basa su un tipo semplice di *reentrant lock*. Questo tipo di lock è facile da usare, ma presenta molte limitazioni. Le pratiche di lock più sofisticate sono supportate dal pacchetto `java.util.concurrent.locks`.
+
+Gli oggetti lock funzionano in modo molto simile ai lock impliciti utilizzati dal codice sincronizzato. Come per i lock impliciti, solo un thread può possedere un oggetto Lock alla volta. Gli oggetti Lock supportano anche un meccanismo di *wait/notify*, tramite gli oggetti `Conditions` a loro associati.
+
+Il più grande vantaggio degli oggetti Lock a differenza degli implicits lock è la loro capacità di tornare indietro da un tentativo di acquisizione di un lock. Il metodo `tryLock` torna indietro se il blocco non è disponibile immediatamente o prima della scadenza di un timeout (se specificato). Il metodo `lockInterruptibly` torna indietro se un altro thread invia un interrupt prima che il blocco venga acquisito.
+
+Usiamo gli oggetti Lock per risolvere il problema del deadlock che abbiamo visto in `Liveness`. Alphonse e Gaston si sono allenati per notare quando un amico sta per inchinarsi. Modelliamo questo miglioramento richiedendo che i nostri oggetti `Friend` debbano acquisire locks per entrambi i partecipanti prima di procedere con l'inchino. Ecco il codice sorgente per il modello migliorato, `Safelock`. Per dimostrare la versatilità di questo approccio, supponiamo che Alphonse e Gaston siano così infatuati della loro nuova capacità di piegarsi in modo sicuro che non possono smettere di inchinarsi l'un l'altro
+
+
+```java
+public class Safelock {
+    static class Friend {
+        private final String name;
+        private final Lock lock = new ReentrantLock();
+
+        public Friend(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public boolean impendingBow(Friend bower) {
+            Boolean myLock = false;
+            Boolean yourLock = false;
+            try {
+                myLock = lock.tryLock();
+                yourLock = bower.lock.tryLock();
+            } finally {
+                if (! (myLock && yourLock)) {
+                    if (myLock) {
+                        lock.unlock();
+                    }
+                    if (yourLock) {
+                        bower.lock.unlock();
+                    }
+                }
+            }
+            return myLock && yourLock;
+        }
+
+        public void bow(Friend bower) {
+            if (impendingBow(bower)) {
+                try {
+                    System.out.format("%s: %s has"
+                        + " bowed to me!%n",
+                        this.name, bower.getName());
+                    bower.bowBack(this);
+                } finally {
+                    lock.unlock();
+                    bower.lock.unlock();
+                }
+            } else {
+                System.out.format("%s: %s started"
+                    + " to bow to me, but saw that"
+                    + " I was already bowing to"
+                    + " him.%n",
+                    this.name, bower.getName());
+            }
+        }
+
+        public void bowBack(Friend bower) {
+            System.out.format("%s: %s has" +
+                " bowed back to me!%n",
+                this.name, bower.getName());
+        }
+    }
+
+    static class BowLoop implements Runnable {
+        private Friend bower;
+        private Friend bowee;
+
+        public BowLoop(Friend bower, Friend bowee) {
+            this.bower = bower;
+            this.bowee = bowee;
+        }
+
+        public void run() {
+            Random random = new Random();
+            for (;;) {
+                try {
+                    Thread.sleep(random.nextInt(10));
+                } catch (InterruptedException e) {}
+                bowee.bow(bower);
+            }
+        }
+    }
+
+
+    public static void main(String[] args) {
+        final Friend alphonse =
+            new Friend("Alphonse");
+        final Friend gaston =
+            new Friend("Gaston");
+        new Thread(new BowLoop(alphonse, gaston)).start();
+        new Thread(new BowLoop(gaston, alphonse)).start();
+    }
+}
+```
+
+
+### Executors
+
+#### Executors Interface
+
+Il pacchetto `java.util.concurrent` definisce tre interfacce executor:
+
+* `Executor`, un'interfaccia semplice che supporta l'avvio di nuovi tasks
+* `ExecutorService`, una subinterfaccia di Executor, che aggiunge funzionalità che aiutano a gestire il ciclo di vita, sia dei singoli task che dell'executor stesso.
+* `ScheduledExecutorService`, una sottointerfaccia di ExecutorService, supporta l'esecuzione futura e / o periodica dei tasks
+
+In genere, le variabili che fanno riferimento a oggetti executor vengono dichiarate come uno di questi tre tipi di interfaccia, non con un tipo di classe executor.
+
+##### The `Executor` Interface
+
+L'interfaccia di `Executor` fornisce un unico metodo, `execute`, progettato per essere un alternativa alla comune pratica di creazione di un thread. Se `r` è un oggetto Runnable ed `e` è un oggetto `Executor`, si può sostituire:
+
+```java
+(new Thread(r)).start();
+```
+
+con
+
+```java
+e.execute(r);
+```
+
+Tuttavia, la definizione di `execute` è meno specifica. In pratica crea un nuovo thread e lo avvia immediatamente. A seconda dell'implementazione di `Executor`, `execute` può fare la stessa cosa, ma è più probabile che utilizzi un worker thread esistente per eseguire `r`, o per posizionare `r` in una coda in attesa che un worker thread diventi disponibile.
+
+Le implementazioni di `executor` in java.util.concurrent sono progettate per sfruttare appieno le interfacce `ExecutorService` e `ScheduledExecutorService` più avanzate, sebbene funzionino anche con l'interfaccia di base di `Executor`.
+
+
+##### The `ExecutorService` Interface
+
+L'interfaccia `ExecutorService` rimpiazza `execute` con un metodo `submit` simile ma più versatile.
+Come `execute`, `submit` accetta oggetti `Runnable`, ma accetta anche gli oggetti `Callable`, che consentono ai task di restituire un valore. Il metodo `submit` restituisce un oggetto `Future`, che viene utilizzato per recuperare il valore restituito da `Callable` e per gestire lo stato di entrambi i task di `Callable` e `Runnable`.
+
+`ExecutorService` fornisce anche metodi per inviare grandi raccolte di oggetti `Callable`. Infine, `ExecutorService` fornisce una serie di metodi per la gestione dell'arresto(shutdown) dell'`executor`. Per supportare l'arresto immediato, i task devono gestire correttamente gli interrupt.
+
+
+#### Thread Pools
+
+La maggior parte delle implementazioni di `executor` in `java.util.concurrent` utilizzano i `thread pool`, costituiti da thread worker thread. Questo tipo di thread esiste separatamente dai task Runnable e Callable eseguiti ed è spesso utilizzato per eseguire più task.
+
+L'utilizzo dei worker thread riduce al minimo l'overhead dovuto alla creazione dei thread. Gli oggetti thread utilizzano una quantità significativa di memoria e, in un'applicazione su larga scala, l'allocazione e la deallocazione di molti oggetti thread crea un significativo overhead di gestione della memoria.
+
+Un tipo comune di pool di thread pool sono i `fixed thread pool`. Questo tipo di thread ha sempre un numero specificato di thread in esecuzione; se un thread è in qualche modo terminato mentre è ancora in uso, viene automaticamente sostituito con un nuovo thread. Le attività vengono inviate al pool di thread tramite una coda interna, che contiene task extra ogni volta che ci sono più task attivi dei thread.
+
+Un importante vantaggio del `fixed thread pool` è che le applicazioni che lo utilizzano *degradano con garbo*. Per capire questo, si consideri un'applicazione server Web in cui ogni richiesta HTTP è gestita da un thread separato. Se l'applicazione crea semplicemente un nuovo thread per ogni nuova richiesta HTTP e il sistema riceve più richieste di quelle che può gestire immediatamente, l'applicazione smetterà improvvisamente di rispondere a tutte le richieste quando il sovraccarico di tutti questi thread supera la capacità del sistema. Con un limite al numero di thread che possono essere creati, l'applicazione non servirà le richieste HTTP con la stessa rapidità con cui entrano, ma saranno servite alla stessa velocità del sistema.
+
+Un modo semplice per creare un `executor` che utilizza un `fixed thread pool` consiste nel richiamare il costruttore tramite `new factoryFixedThreadPool` in `java.util.concurrent.Executors`. Questa classe fornisce inoltre i seguenti metodi:
+
+* Il metodo `newCachedThreadPool` crea un executor con un pool di thread espandibile. Questo executor è adatto per applicazioni che lanciano molte attività di breve durata.
+* Il metodo `newSingleThreadExecutor` crea un executor che esegue una singola attività alla volta.
+
+Se nessuno degli executors forniti dai metodi precedenti soddisfa le proprie esigenze, la costruzione di istanze di `java.util.concurrent.ThreadPoolExecutor` o `java.util.concurrent.ScheduledThreadPoolExecutor` offre opzioni aggiuntive.
+
+
+### Concurrent Collections
+
+
+Il package `java.util.concurrent` include numerose aggiunte al Framework Java Collections:
+
+* `BlockingQueue` definisce una struttura dati first-in-first-out che blocca o scade quando si tenta di aggiungere a una coda completa o di recuperare da una coda vuota.
+* `ConcurrentMap` è una sottointerfaccia di `java.util.Map` che definisce utili operazioni atomiche. Queste operazioni rimuovono o sostituiscono una coppia chiave-valore solo se la chiave è presente, o aggiungono una coppia chiave-valore solo se la chiave è assente. Rendere atomiche queste operazioni aiuta a evitare la sincronizzazione. L'implementazione standard generale di `ConcurrentMap` è `ConcurrentHashMap`, che è l'analogo concorrente di HashMap.
+* `ConcurrentNavigableMap` è una sottointerfaccia di `ConcurrentMap` che supporta matches approssimativi. L'implementazione standard generale di `ConcurrentNavigableMap` è `ConcurrentSkipListMap`, che è un analogo concorrente di `TreeMap`.
+
+
+Tutte queste collections consentono di evitare errori di coerenza della memoria definendo una relazione happens-before tra un'operazione che aggiunge un oggetto alla collection con operazioni successive che accedono o rimuovono quell'oggetto.
+
+
+### Atomic Variables
+
+Il package `java.util.concurrent.atomic` definisce classi che supportano operazioni atomiche su singole variabili. Tutte le classi hanno metodi get e set che funzionano come letture e scritture su variabili volatili. Cioè, un `setter` ha una relazione happens-before con qualsiasi succesivo `getter` sulla stessa variabile. Anche il metodo `compareAndSet` ha queste caratteristiche di memory Consistency, così come i metodi aritmetici atomici che si applicano alle variabili atomiche intere.
