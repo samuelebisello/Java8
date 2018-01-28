@@ -2115,7 +2115,7 @@ Gli oggetti di tipo `Scanner` sono utili per spezzare input formattati in tokens
 
 
 <p align="center">
-  <img src="/img/byteStream.gif" width="350"/>
+  <img src="/img/token.gif" width="350"/>
 </p>
 </br>
 
@@ -2197,7 +2197,7 @@ Altre conversioni:
 * `s` formatta qualsiasi valore come stringa
 
 
-### I/O from the COmmand Line
+### I/O from the Command Line
 
 Un programma viene spesso eseguito da riga di comando e interagisce con l'utente dariga di comando. La piattaforma Java supporta questo tipo di interazione in due modi: attraverso stream standard e attraverso la console.
 
